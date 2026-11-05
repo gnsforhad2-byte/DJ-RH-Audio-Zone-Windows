@@ -1,0 +1,2777 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>ফরহাদ ভাই কিবোর্ড - প্রো ল্যান্ডস্কেপ</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+            margin: 0;
+            padding: 0;
+        }
+        body, html {
+            width: 100vw;
+            height: 100vh;
+            background-color: #09090b;
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+        }
+
+        #lock-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #050508;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .login-logo {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+        .login-logo-icon {
+            font-size: 2.2rem;
+            filter: drop-shadow(0 0 10px rgba(0, 217, 255, 0.6));
+        }
+        .login-logo-text {
+            font-size: 1.3rem;
+            font-weight: 900;
+            color: #00d9ff;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            text-shadow: 0 0 12px rgba(0, 217, 255, 0.4);
+        }
+
+        .lock-box {
+            background: #111;
+            border: 2px solid #00d9ff;
+            padding: 20px 25px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 0 25px rgba(0, 217, 255, 0.3);
+            width: 320px;
+        }
+        .lock-box h2 {
+            font-size: 0.95rem;
+            color: #ffffff;
+            margin-bottom: 12px;
+            letter-spacing: 0.5px;
+        }
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 12px;
+            text-align: left;
+        }
+        .input-group label {
+            font-size: 0.75rem;
+            color: #8b949e;
+        }
+        .login-input {
+            width: 100%;
+            background: #000;
+            border: 1px solid #333;
+            color: #00ffcc;
+            font-size: 0.85rem;
+            padding: 8px 10px;
+            border-radius: 6px;
+            outline: none;
+        }
+        .login-input:focus {
+            border-color: #00d9ff;
+        }
+        .login-btn {
+            width: 100%;
+            background: #00d9ff;
+            color: #000;
+            border: none;
+            padding: 10px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .login-btn:active {
+            background: #00a2ff;
+        }
+
+        #force-landscape-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            transform: none;
+            background-color: #09090b;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: stretch;
+            overflow: hidden;
+            display: none;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            background: #000000;
+            padding: 2px 4px;
+            border-bottom: 3px solid #1f1f1f;
+            height: 107px;
+            flex-shrink: 0;
+            position: relative;
+            width: 100%;
+        }
+
+        .left-controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            overflow-x: auto;
+            padding: 2px 0;
+            flex-shrink: 0;
+        }
+        .left-controls::-webkit-scrollbar {
+            display: none;
+        }
+
+        .btn-col {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .control-btn {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            font-size: 0.5rem;
+            font-weight: 900;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.7);
+            text-align: center;
+            transition: transform 0.1s;
+            white-space: nowrap;
+            padding: 0 1px;
+            line-height: 1.1;
+        }
+        .control-btn:active {
+            transform: scale(0.92);
+        }
+
+        .tone-plus { background: #0b2522; color: #00ffcc; border: 2.5px solid #00ffcc; }
+        .tone-minus { background: #250b1f; color: #ff66ff; border: 2.5px solid #ff66ff; }
+        .rel-plus { background: #25220b; color: #ffcc00; border: 2.5px solid #ffcc00; font-size: 0.4rem; }
+        .rel-minus { background: #0b1a25; color: #3399ff; border: 2.5px solid #3399ff; font-size: 0.4rem; }
+        .vol-plus { background: #0b250b; color: #33ff33; border: 2.5px solid #33ff33; font-size: 0.4rem; }
+        .vol-minus { background: #250b0b; color: #ff4d4d; border: 2.5px solid #ff4d4d; font-size: 0.4rem; }
+        .zoom-in { background: #22250b; color: #d4ff00; border: 2.5px solid #d4ff00; font-size: 0.44rem; }
+        .zoom-out { background: #0b2225; color: #00ffff; border: 2.5px solid #00ffff; font-size: 0.4rem; }
+        .style-plus { background: #1d0b25; color: #df80ff; border: 2.5px solid #b300ff; }
+        .style-minus { background: #25180b; color: #ff9933; border: 2.5px solid #ff9933; font-size: 0.4rem; }
+        .style-on { background: #0b2515; color: #00ff88; border: 2.5px solid #00ff88; font-size: 0.46rem; }
+        .style-off { background: #250b12; color: #ff3366; border: 2.5px solid #ff3366; font-size: 0.4rem; }
+
+        .phone-display {
+            position: relative;
+            background: #00a2ff;
+            border: 3px solid #003a66;
+            aspect-ratio: 16 / 9;
+            height: 100px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0, 162, 255, 0.4), inset 0 0 15px rgba(0, 0, 0, 0.2);
+            transition: opacity 0.5s ease, filter 0.5s ease;
+            color: #000;
+            background-size: cover;
+            background-position: center;
+            width: 190px;
+            flex-shrink: 0;
+            margin: 0 auto;
+        }
+
+        .phone-display.sleep {
+            opacity: 0.08;
+            filter: grayscale(100%);
+        }
+
+        .phone-display::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 50%);
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .status-bar {
+            background: rgba(0, 85, 170, 0.95);
+            padding: 2px 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.45rem;
+            color: #fff;
+            font-weight: bold;
+            z-index: 2;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+            flex-shrink: 0;
+        }
+
+        .midi-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            font-size: 0.42rem;
+            background: rgba(0,0,0,0.3);
+            padding: 1px 3px;
+            border-radius: 3px;
+        }
+        .midi-dot {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background-color: #ff3333;
+            box-shadow: 0 0 4px #ff3333;
+            transition: background-color 0.3s, box-shadow 0.3s;
+        }
+        .midi-dot.connected {
+            background-color: #00ff66;
+            box-shadow: 0 0 6px #00ff66;
+        }
+
+        .lcd-content {
+            flex: 1;
+            position: relative;
+            z-index: 2;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .page {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            padding: 3px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transform: scale(0.95);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none;
+        }
+
+        .page.active {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: auto;
+        }
+
+        #page-home { 
+            background: linear-gradient(135deg, #4b0082 0%, #002b49 40%, #8b008b 80%, #ff1493 100%); 
+            text-align: center;
+            justify-content: space-evenly;
+            padding: 2px;
+            box-shadow: inset 0 0 20px rgba(0, 255, 255, 0.4);
+            background-size: cover;
+            background-position: center;
+        }
+
+        .scrolling-number-ticker {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            border-top: 1.5px solid #00ffff;
+            border-bottom: 1.5px solid #ff00ff;
+            overflow: hidden;
+            white-space: nowrap;
+            padding: 2px 0;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.7);
+        }
+
+        .ticker-track {
+            display: inline-block;
+            white-space: nowrap;
+            will-change: transform;
+        }
+
+        .ticker-text-item {
+            display: inline-block;
+            font-size: 0.45rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-right: 30px;
+            text-shadow: 0 0 8px rgba(0,0,0,0.8);
+        }
+
+        .home-thumbnail {
+            background: rgba(15, 15, 30, 0.85);
+            border: 2px solid #00ffff;
+            padding: 2px 5px;
+            border-radius: 6px;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1px;
+            max-width: 98%;
+        }
+        .home-icon { font-size: 0.58rem; }
+        .home-title {
+            font-size: 0.45rem;
+            font-weight: 900;
+            color: #ffff00;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+        }
+        .home-badge {
+            font-size: 0.32rem;
+            color: #00ffff;
+            background: rgba(0, 255, 255, 0.2);
+            padding: 1px 4px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+        .home-sub {
+            font-size: 0.35rem;
+            color: #00ff88;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .menu-view {
+            padding: 2px;
+            justify-content: flex-start;
+            background: rgba(16, 42, 67, 0.85);
+        }
+        .menu-list {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            width: 100%;
+            transition: transform 0.2s ease;
+        }
+        .menu-item {
+            padding: 3px 5px;
+            background: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            font-size: 0.48rem;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 3px solid transparent;
+            border-radius: 3px;
+        }
+        .menu-item.selected {
+            background: rgba(0, 217, 255, 0.4);
+            color: #00d9ff;
+            border-left: 3px solid #00d9ff;
+        }
+
+        .sub-window-card {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            text-align: center;
+            padding: 2px;
+        }
+        .sub-title { font-size: 0.48rem; font-weight: bold; }
+        .sub-box {
+            background: rgba(0, 0, 0, 0.8);
+            width: 100%;
+            padding: 2px 4px;
+            font-family: monospace;
+            font-size: 0.42rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+            max-height: 70px;
+            overflow-y: auto;
+        }
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 1px 2px;
+            border-radius: 2px;
+        }
+        .setting-row.active-setting {
+            background: rgba(0, 217, 255, 0.35);
+            color: #00ffcc;
+            font-weight: bold;
+        }
+
+        .style-bank-container {
+            width: 100%;
+            max-height: 72px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            text-align: left;
+            padding-right: 2px;
+        }
+        .style-bank-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0,0,0,0.6);
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-size: 0.43rem;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .style-bank-item.active-playing {
+            border: 1px solid #00ffcc;
+            background: rgba(0, 255, 204, 0.2);
+        }
+        .style-name {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 70px;
+            color: #fff;
+        }
+        .style-actions { display: flex; gap: 2px; }
+        .style-btn {
+            padding: 1px 3px;
+            font-size: 0.38rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .style-on-btn { background: #ff3333; color: #fff; }
+        .style-on-btn.active { background: #00cc44; }
+        .style-stop-btn { background: #555; color: #fff; }
+
+        .controls-group {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            flex-shrink: 0;
+            padding-right: 2px;
+        }
+
+        .right-col {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .right-btn {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            font-size: 0.5rem;
+            font-weight: 900;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.8);
+            text-align: center;
+            transition: transform 0.1s;
+            white-space: nowrap;
+            padding: 0 1px;
+        }
+        .right-btn:active { transform: scale(0.92); }
+
+        .btn-prev { background: #381d00; color: #ffaa00; border: 2.5px solid #ffaa00; }
+        .btn-oct-minus { background: #003322; color: #00ffaa; border: 2.5px solid #00ffaa; font-size: 0.42rem; }
+        .btn-ok { background: #002238; color: #00bfff; border: 2.5px solid #00bfff; }
+        .btn-oct-plus { background: #331100; color: #ff8833; border: 2.5px solid #ff8833; font-size: 0.42rem; }
+        .btn-next { background: #330022; color: #ff55cc; border: 2.5px solid #ff55cc; }
+        .btn-tone-load { background: #220033; color: #cc66ff; border: 2.5px solid #cc66ff; font-size: 0.44rem; }
+        .btn-back { background: #330000; color: #ff4444; border: 2.5px solid #ff4444; }
+        .btn-style-load { background: #003333; color: #00ffff; border: 2.5px solid #00ffff; font-size: 0.44rem; }
+        .btn-bpm-minus { background: #1a0033; color: #ff99ff; border: 2.5px solid #ff99ff; font-size: 0.42rem; }
+        .btn-bpm-plus { background: #002211; color: #66ff99; border: 2.5px solid #66ff99; font-size: 0.42rem; }
+        
+        .btn-record { background: #500; color: #fff; border: 2.5px solid #ff3333; font-size: 0.46rem; animation: recPulse 1.5s infinite; }
+        .btn-record.recording { background: #ff0000; box-shadow: 0 0 12px #ff0000; }
+        @keyframes recPulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+
+        .piano-container {
+            display: flex;
+            position: relative;
+            background: #000;
+            width: 100%;
+            flex: 1;
+            overflow-x: auto;
+            overflow-y: hidden;
+            white-space: nowrap;
+            transition: transform 0.15s ease;
+        }
+        .key {
+            box-sizing: border-box;
+            position: relative;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: width 0.15s ease;
+        }
+        .white-key {
+            height: 100%;
+            background: #ffffff;
+            border: 1px solid #888;
+            z-index: 1;
+            box-shadow: inset 0 -8px 12px rgba(0,0,0,0.2);
+        }
+        .white-key.active { background: #cccccc !important; }
+        .black-key {
+            height: 60%;
+            background: #111;
+            position: absolute;
+            z-index: 2;
+            border: 1px solid #000;
+            box-shadow: 0 3px 5px rgba(0,0,0,0.8);
+        }
+        .black-key.active { background: #444444 !important; }
+
+        #audioUpload, #styleUpload, #bgUpload { display: none; }
+    
+
+/* FORCE LANDSCAPE VIEW FIX */
+@media screen and (orientation: portrait) {
+  #force-landscape-wrapper {
+    width: 100vh !important;
+    height: 100vw !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) rotate(90deg) !important;
+    transform-origin: center center !important;
+  }
+}
+@media screen and (orientation: landscape) {
+  #force-landscape-wrapper {
+    width: 100vw !important;
+    height: 100vh !important;
+    top: 0 !important;
+    left: 0 !important;
+    transform: none !important;
+  }
+}
+</style>
+</head>
+<body>
+
+    <div id="lock-screen">
+        <div class="login-logo">
+            <span class="login-logo-icon">🎹</span>
+            <span class="login-logo-text">ফরহাদ ভাই কিবোর্ড</span>
+        </div>
+
+        <div class="lock-box">
+            <h2>লগইন করতে তথ্য দিন</h2>
+            <div class="input-group">
+                <label>ইমেইল অ্যাড্রেস</label>
+                <input type="email" id="emailInput" class="login-input" value="admin@domain.com" placeholder="আপনার Firebase ইমেইল">
+            </div>
+            <div class="input-group">
+                <label>পাসওয়ার্ড</label>
+                <input type="password" id="passwordInput" class="login-input" value="123456" placeholder="আপনার পাসওয়ার্ড" onkeydown="checkEnter(event)">
+            </div>
+            <button class="login-btn" onclick="submitLogin()">লগইন করুন</button>
+            <div id="login-message" role="status" aria-live="polite"
+                 style="margin:12px auto 0;max-width:90%;text-align:center;
+                 color:#ffb3b3;font-size:14px;white-space:pre-wrap;
+                 overflow-wrap:anywhere;"></div>
+        </div>
+    </div>
+
+    <div id="force-landscape-wrapper">
+        <div class="header">
+            <div class="left-controls">
+                <div class="btn-col">
+                    <button class="control-btn tone-plus" onclick="onControlAction('tone', 1)">T+</button>
+                    <button class="control-btn tone-minus" onclick="onControlAction('tone', -1)">T-</button>
+                </div>
+                <div class="btn-col">
+                    <button class="control-btn rel-plus" onclick="onControlAction('rel', 1)">REL+</button>
+                    <button class="control-btn rel-minus" onclick="onControlAction('rel', -1)">REL-</button>
+                </div>
+                <div class="btn-col">
+                    <button class="control-btn vol-plus" onclick="onControlAction('vol', 1)">VOL+</button>
+                    <button class="control-btn vol-minus" onclick="onControlAction('vol', -1)">VOL-</button>
+                </div>
+                <div class="btn-col">
+                    <button class="control-btn zoom-in" onclick="onControlAction('zoom', 1)">Z+</button>
+                    <button class="control-btn zoom-out" onclick="onControlAction('zoom', -1)">Z-</button>
+                </div>
+                <div class="btn-col">
+                    <button class="control-btn style-plus" onclick="onControlAction('style', 1)">S+</button>
+                    <button class="control-btn style-minus" onclick="onControlAction('style', -1)">S-</button>
+                </div>
+                <div class="btn-col">
+                    <button class="control-btn style-on" onclick="onControlAction('on', 1)">ON</button>
+                    <button class="control-btn style-off" onclick="onControlAction('off', 1)">OFF</button>
+                </div>
+            </div>
+            
+            <div class="phone-display" id="lcdDisplay">
+                <div class="status-bar">
+                    <div class="midi-indicator">
+                        <div class="midi-dot" id="midiDot"></div>
+                        <span id="midiText">MIDI: OFF</span>
+                    </div>
+                    <span id="currentToneDisplay">T: GRAND PIANO</span>
+                </div>
+
+                <div class="lcd-content">
+                    <div class="page active" id="page-home">
+                        <div class="scrolling-number-ticker" id="tickerContainer">
+                            <div class="ticker-track" id="tickerTrack"></div>
+                        </div>
+
+                        <div class="home-thumbnail">
+                            <div class="home-icon">🎧 🎹</div>
+                            <div class="home-title">DJ RH AUDIO ZONE</div>
+                            <div class="home-badge">PRO KEYBOARD REMIX</div>
+                        </div>
+                        <div class="home-sub" id="realtimeStatusSub">PRESS [ OK ] TO OPEN MENU</div>
+                    </div>
+
+                    <div class="page menu-view" id="page-menu">
+                        <div class="menu-list" id="menuList">
+                            <div class="menu-item selected" id="menu-0"><span>১. প্রো মাল্টি-লেয়ার টোন ব্যাংক</span><span>▶</span></div>
+                            <div class="menu-item" id="menu-1"><span>২. মাস্টার পিচ ও মাইক্রো-টিউনিং</span><span>▶</span></div>
+                            <div class="menu-item" id="menu-2"><span>৩. স্টুডিও কনসার্ট রিভার্ব ইঞ্জিন</span><span>▶</span></div>
+                            <div class="menu-item" id="menu-3"><span>৪. স্টেরিও ইকো ও ডিলে স্টুডিও</span><span>▶</span></div>
+                            <div class="menu-item" id="menu-4"><span>৫. প্রো এনভলপ রিলিজ ও ডায়নামিক্স</span><span>▶</span></div>
+                            <div class="menu-item" id="menu-5"><span>৬. কাস্টম স্যাম্পল ফাইল লোডার</span><span>▶</span></div>
+                            <div class="menu-item" id="menu-6"><span>৭. প্রেসার টাচ সেনসিটিভিটি প্রো</span><span>▶</span></div>
+                            <div class="menu-item" id="menu-7"><span>৮. প্রো স্টাইল লুপ ও অডিও ইঞ্জেক্ট</span><span>▶</span></div>
+                            <div class="menu-item" id="menu-8"><span>৯. অল ওয়ালপেপার সেটিংস (Themes & Number)</span><span>▶</span></div>
+                            <div class="menu-item" id="menu-9"><span>১০. স্থায়ী টোন ব্যাংক (Tone Bank)</span><span>▶</span></div>
+                            <div class="menu-item" id="menu-10"><span>১১. স্থায়ী স্টাইল ব্যাংক (Style Bank)</span><span>▶</span></div>
+                        </div>
+                    </div>
+
+                    <div class="page" id="page-tone">
+                        <div class="sub-window-card">
+                            <div class="sub-title">🎵 প্রো মাল্টি-লেয়ার টোন ব্যাংক</div>
+                            <div class="sub-box" style="display:block; text-align:center;" id="toneDetailBox">টোন: [ GRAND PIANO ]</div>
+                            <small style="font-size:0.35rem;">[-] ও [+] দিয়ে টোন পরিবর্তন করুন</small>
+                        </div>
+                    </div>
+
+                    <div class="page" id="page-octave">
+                        <div class="sub-window-card">
+                            <div class="sub-title">🎹 মাস্টার পিচ ও মাইক্রো-টিউনিং</div>
+                            <div class="sub-box" style="display:block; text-align:center;" id="octaveDetailBox">সেমিটোন শিফট: [ 0 Key ]</div>
+                            <small style="font-size:0.35rem;">[-] ও [+] দিয়ে পিচ নিখুঁত করুন</small>
+                        </div>
+                    </div>
+
+                    <div class="page" id="page-reverb">
+                        <div class="sub-window-card">
+                            <div class="sub-title">🎛️ কনসার্ট রিভার্ব ইঞ্জিন (0-100%)</div>
+                            <div class="sub-box" id="reverbSubBox">
+                                <div class="setting-row active-setting" id="rev-opt-0"><span>১. রুম সাইজ:</span> <span id="revValRoom">50%</span></div>
+                                <div class="setting-row" id="rev-opt-1"><span>২. প্রি-ডিলে:</span> <span id="revValPre">20%</span></div>
+                                <div class="setting-row" id="rev-opt-2"><span>৩. ডিকে টাইম:</span> <span id="revValDecay">60%</span></div>
+                                <div class="setting-row" id="rev-opt-3"><span>৪. ডেপথ (Mix):</span> <span id="revValDepth">40%</span></div>
+                                <div class="setting-row" id="rev-opt-4"><span>৫. ড্যাম্পিং:</span> <span id="revValDamp">50%</span></div>
+                            </div>
+                            <small style="font-size:0.33rem;" id="reverbHint">OK চাপুন, তারপর [-][+] দিয়ে মান বদলান</small>
+                        </div>
+                    </div>
+
+                    <div class="page" id="page-delay">
+                        <div class="sub-window-card">
+                            <div class="sub-title">⏳ স্টেরিও ইকো ও ডিলে স্টুডিও</div>
+                            <div class="sub-box" id="delaySubBox">
+                                <div class="setting-row active-setting" id="del-opt-0"><span>১. ডিলে টাইম:</span> <span id="delValTime">30%</span></div>
+                                <div class="setting-row" id="del-opt-1"><span>২. ফিডব্যাক:</span> <span id="delValFb">30%</span></div>
+                                <div class="setting-row" id="del-opt-2"><span>৩. লো-কাট:</span> <span id="delValLow">10%</span></div>
+                                <div class="setting-row" id="del-opt-3"><span>৪. হাই-কাট:</span> <span id="delValHigh">40%</span></div>
+                                <div class="setting-row" id="del-opt-4"><span>৫. স্টেরিও স্প্রেড:</span> <span id="delValSpread">50%</span></div>
+                                <div class="setting-row" id="del-opt-5"><span>৬. মিক্স লেভেল:</span> <span id="delValMix">40%</span></div>
+                            </div>
+                            <small style="font-size:0.33rem;" id="delayHint">OK চাপুন, তারপর [-][+] দিয়ে মান বদলান</small>
+                        </div>
+                    </div>
+
+                    <div class="page" id="page-release">
+                        <div class="sub-window-card">
+                            <div class="sub-title">🎚️ প্রো এনভলপ রিলিজ ও ডায়নামিক্স</div>
+                            <div class="sub-box" style="display:block; text-align:center;" id="releaseDetailBox">রিলিজ টাইম: [ 0.15s ]</div>
+                            <small style="font-size:0.35rem;">[-] ও [+] দিয়ে রিলিজ সেট করুন</small>
+                        </div>
+                    </div>
+
+                    <div class="page" id="page-loadtone">
+                        <div class="sub-window-card">
+                            <div class="sub-title">📂 কাস্টম স্যাম্পল ফাইল লোডার</div>
+                            <div class="sub-box" style="display:block; text-align:center;" id="loadToneDetailBox">ফাইল: [ কোনো ফাইল নেই ]</div>
+                            <small style="font-size:0.35rem;">OK চাপলে স্টোরেজ খুলবে</small>
+                        </div>
+                    </div>
+
+                    <div class="page" id="page-touch">
+                        <div class="sub-window-card">
+                            <div class="sub-title">⚡ প্রেসার টাচ সেনসিটিভিটি প্রো</div>
+                            <div class="sub-box" style="display:block; text-align:center;">প্রেসার রেসপন্স: [ 100% FIXED ]</div>
+                            <small style="font-size:0.35rem;">[-] ও [+] দিয়ে রেসপন্স সেট করুন</small>
+                        </div>
+                    </div>
+
+                    <div class="page" id="page-loadstyle">
+                        <div class="sub-window-card">
+                            <div class="sub-title">📥 প্রো স্টাইল লুপ ও অডিও ইঞ্জেক্ট</div>
+                            <div class="sub-box" style="display:block; text-align:center;" id="loadStyleDetailBox">লুপ: [ ফাইল নেই ]<br><b style="color:#00ffcc;">সেভ করতে [OK]</b></div>
+                            <small style="font-size:0.35rem;">স্টোরেজ থেকে রিদম ফাইল সিলেক্ট করুন</small>
+                        </div>
+                    </div>
+
+                    <div class="page" id="page-wallpaper" style="background: rgba(20, 10, 40, 0.95);">
+                        <div class="sub-window-card">
+                            <div class="sub-title" style="color: #ff00ea;">🎨 থিম ও স্ক্রলিং কালার সেটিংস</div>
+                            <div class="sub-box" id="wallpaperSubBox" style="text-align: left; padding: 3px;">
+                                <div class="setting-row active-setting" id="wp-opt-0"><span>১. ব্যাকগ্রাউন্ড থিম:</span> <span id="themeNameDisp" style="color: #00ffcc;">রয়্যাল পার্পল</span></div>
+                                <div class="setting-row" id="wp-opt-1"><span>২. কাস্টম ব্যাকগ্রাউন্ড ছবি:</span> <span style="color: #ffaa00;">[ফাইল সিলেক্ট]</span></div>
+                                <div class="setting-row" id="wp-opt-2"><span>৩. স্ক্রলিং লেখার কালার:</span> <span id="scrollColorDisp" style="color: #00ffff;">নিয়ন সায়ান</span></div>
+                                <div class="setting-row" id="wp-opt-3"><span>৪. কাস্টম নম্বর যোগ করুন:</span> <span style="color: #00ffcc;">[সেট করুন]</span></div>
+                            </div>
+                            <small style="font-size:0.32rem; color: #ffff00;" id="wpHint">OK চাপুন অপশন এডিট করতে</small>
+                        </div>
+                    </div>
+
+                    <div class="page" id="page-tonebank">
+                        <div class="sub-window-card">
+                            <div class="sub-title" id="toneBankTitle">🎵 টোন ব্যাংক (মোট: ০)</div>
+                            <div class="style-bank-container" id="toneBankList">
+                                <div style="font-size: 0.43rem; color: #888; text-align: center; margin-top: 10px;">কোনো টোন নেই</div>
+                            </div>
+                            <small style="font-size:0.33rem; color:#00ffcc;">[-] ও [+] দিয়ে স্ক্রোল করুন</small>
+                        </div>
+                    </div>
+
+                    <div class="page" id="page-stylebank">
+                        <div class="sub-window-card">
+                            <div class="sub-title" id="styleBankTitle">🎛️ স্টাইল ব্যাংক (মোট: ০)</div>
+                            <div style="display:flex; gap:10px; width:100%; margin:8px 0 10px;">
+                                <button onclick="changeStyleVolume(1)" style="flex:1; min-height:44px; padding:8px 4px; background:#16a34a; color:white; border:2px solid #4ade80; border-radius:8px; font-size:0.72rem; font-weight:bold;">E-STYLE VOL +</button>
+                                <button onclick="changeStyleVolume(-1)" style="flex:1; min-height:44px; padding:8px 4px; background:#dc2626; color:white; border:2px solid #f87171; border-radius:8px; font-size:0.72rem; font-weight:bold;">E-STYLE VOL −</button>
+                            </div>
+                            <div class="style-bank-container" id="styleBankList">
+                                <div style="font-size: 0.43rem; color: #888; text-align: center; margin-top: 10px;">কোনো লুপ নেই</div>
+                            </div>
+                            <small style="font-size:0.33rem; color:#00ffcc;">[-] ও [+] দিয়ে স্ক্রোল করুন</small>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="controls-group">
+                <div class="right-col">
+                    <button class="right-btn btn-prev" onclick="handlePrev()">-</button>
+                    <button class="right-btn btn-oct-minus" onclick="changeOctave(-1)">OCT-</button>
+                </div>
+                <div class="right-col">
+                    <button class="right-btn btn-ok" onclick="handleOk()">OK</button>
+                    <button class="right-btn btn-oct-plus" onclick="changeOctave(1)">OCT+</button>
+                </div>
+                <div class="right-col">
+                    <button class="right-btn btn-next" onclick="handleNext()">+</button>
+                    <button class="right-btn btn-tone-load" onclick="document.getElementById('audioUpload').click()">TLD</button>
+                </div>
+                <div class="right-col">
+                    <button class="right-btn btn-back" onclick="goBack()">BK</button>
+                    <button class="right-btn btn-style-load" onclick="document.getElementById('styleUpload').click()">SLD</button>
+                </div>
+                <div class="right-col">
+                    <button class="right-btn btn-bpm-minus" onclick="changeBpm(-1)">BPM-</button>
+                    <button class="right-btn btn-bpm-plus" onclick="changeBpm(1)">BPM+</button>
+                </div>
+                <div class="right-col">
+                    <button class="right-btn btn-record" id="recordBtn" onclick="toggleRecording()" title="রেকর্ড স্টার্ট/স্টপ">REC</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="piano-container" id="piano"></div>
+    </div>
+
+    <input type="file" id="audioUpload" accept=".mp3, .wav, audio/mpeg, audio/wav" onchange="loadCustomAudioToneDirect(event)">
+    <input type="file" id="styleUpload" accept=".mp3, .wav, .mid, audio/*" onchange="loadAndSaveStyleDirect(event)">
+    <input type="file" id="bgUpload" accept="image/*" onchange="loadCustomBackgroundImage(event)">
+
+    <script src="firebase/firebase-app-compat.js"
+      onerror="var m=document.getElementById('login-message');if(m)m.textContent='Firebase SDK লোড হয়নি। অ্যাপের SDK ফাইল পরীক্ষা করুন।';"></script>
+    <script src="firebase/firebase-auth-compat.js"
+      onerror="var m=document.getElementById('login-message');if(m)m.textContent='Firebase Auth SDK লোড হয়নি।';"></script>
+    <script>
+        const themesList = [
+            { name: "রয়্যাল পার্পল গ্লো", bg: "linear-gradient(135deg, #4b0082 0%, #002b49 40%, #8b008b 80%, #ff1493 100%)" },
+            { name: "সাইবার পাঙ্ক নিয়ন", bg: "linear-gradient(135deg, #001122 0%, #00ffcc 50%, #ff00ea 100%)" },
+            { name: "ইমপেরিয়াল গোল্ড", bg: "linear-gradient(135deg, #331a00 0%, #ffaa00 50%, #660033 100%)" },
+            { name: "সবুজ গ্রামের ক্ষেত ১", bg: "linear-gradient(135deg, #0b3b17 0%, #196f3d 50%, #27ae60 100%)" },
+            { name: "নদীর পাড়ের গোধূলি", bg: "linear-gradient(135deg, #78281f 0%, #b03a2e 50%, #f39c12 100%)" },
+            { name: "নদীর শান্ত জলরাশি", bg: "linear-gradient(135deg, #1b4f72 0%, #2874a6 50%, #5dade2 100%)" },
+            { name: "সোনালী ধানের শিষ", bg: "linear-gradient(135deg, #7e5109 0%, #b7950b 50%, #f1c40f 100%)" },
+            { name: "গ্রামের সকালের কুয়াশা", bg: "linear-gradient(135deg, #2c3e50 0%, #4ca1af 50%, #c4e0e5 100%)" },
+            { name: "স্টুডিও ডার্ক থিম", bg: "linear-gradient(135deg, #111111 0%, #222222 50%, #333333 100%)" }
+        ];
+
+        const scrollColorsList = [
+            { name: "নিয়ন সায়ান", val: "linear-gradient(90deg, #00ffff, #ff00ff, #ffff00, #00ff66, #ff3333, #00ffff)" },
+            { name: "আগুন লাল (Red)", val: "linear-gradient(90deg, #ff0000, #ff6600, #ffff00, #ff0000)" },
+            { name: "উজ্জ্বল নীল (Blue)", val: "linear-gradient(90deg, #00bfff, #00ffff, #ffffff, #00bfff)" },
+            { name: "সবুজ ভাইব্রেন্ট (Green)", val: "linear-gradient(90deg, #00ff66, #ffff00, #00ffcc, #00ff66)" },
+            { name: "হলুদ গোল্ডেন (Yellow)", val: "linear-gradient(90deg, #ffff00, #ff9900, #ffffff, #ffff00)" },
+            { name: "বেগুনি ম্যাজেন্টা (Purple)", val: "linear-gradient(90deg, #ff00ff, #cc66ff, #ffffff, #ff00ff)" }
+        ];
+
+        let userCustomNumbers = JSON.parse(localStorage.getItem('farhad_custom_nums')) || [];
+        let currentThemeIndex = parseInt(localStorage.getItem('farhad_theme_idx')) || 0;
+        let currentScrollColorIndex = parseInt(localStorage.getItem('farhad_scroll_color_idx')) || 0;
+        let customBgImageURL = localStorage.getItem('farhad_custom_bg') || null;
+
+        function applyCurrentTheme() {
+            const homePage = document.getElementById('page-home');
+            if (homePage) {
+                if (customBgImageURL) {
+                    homePage.style.background = `url('${customBgImageURL}') center/cover no-repeat`;
+                } else {
+                    homePage.style.background = themesList[currentThemeIndex].bg;
+                }
+            }
+            const themeDisp = document.getElementById('themeNameDisp');
+            if (themeDisp) {
+                themeDisp.innerText = customBgImageURL ? "কাস্টম ছবি" : themesList[currentThemeIndex].name;
+            }
+        }
+
+        function applyScrollColor() {
+            const styleItems = document.querySelectorAll('.ticker-text-item');
+            const colorGrad = scrollColorsList[currentScrollColorIndex].val;
+            styleItems.forEach(item => {
+                item.style.background = colorGrad;
+                item.style.backgroundSize = "200% auto";
+                item.style.webkitBackgroundClip = "text";
+                item.style.webkitTextFillColor = "transparent";
+            });
+            const colorDisp = document.getElementById('scrollColorDisp');
+            if (colorDisp) {
+                colorDisp.innerText = scrollColorsList[currentScrollColorIndex].name;
+            }
+        }
+
+        function buildTickerContent() {
+            const track = document.getElementById("tickerTrack");
+            if (!track) return;
+
+            let itemsHTML = `<span class="ticker-text-item">📞 WHATSAPP/IMO: 01767663449</span>
+                             <span class="ticker-text-item">🎵 এমডি ফরহাদ ভাই</span>`;
+            
+            userCustomNumbers.forEach(num => {
+                itemsHTML += `<span class="ticker-text-item">📱 কাস্টম নম্বর: ${num}</span>`;
+            });
+
+            itemsHTML += `<span class="ticker-text-item">📞 WHATSAPP/IMO: 01767663449</span>
+                          <span class="ticker-text-item">🎵 এমডি ফরহাদ ভাই</span>`;
+
+            track.innerHTML = itemsHTML + itemsHTML;
+            applyScrollColor();
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            applyCurrentTheme();
+            buildTickerContent();
+            
+            const track = document.getElementById("tickerTrack");
+            if (track) {
+                let pos = 0;
+                function stepScroll() {
+                    pos -= 0.8;
+                    let firstItemWidth = track.firstElementChild ? track.firstElementChild.offsetWidth + 30 : 200;
+                    if (Math.abs(pos) >= firstItemWidth) {
+                        pos += firstItemWidth;
+                        track.appendChild(track.firstElementChild);
+                    }
+                    track.style.transform = `translateX(${pos}px)`;
+                    requestAnimationFrame(stepScroll);
+                }
+                requestAnimationFrame(stepScroll);
+            }
+        });
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDGmSJZkiznIE5rL88LLfnLs4sklpmbX7M",
+            authDomain: "dj-rh-audio-zone.firebaseapp.com",
+            projectId: "dj-rh-audio-zone",
+            storageBucket: "dj-rh-audio-zone.firebasestorage.app",
+            messagingSenderId: "875269298595",
+            appId: "1:875269298595:web:1afc6cbf52ae490f8fe216"
+        };
+
+        let keyboardAuth = null;
+        let authPersistenceReady = Promise.resolve();
+        let keyboardSessionReady = false;
+
+        function showLoginMessage(message, success = false) {
+            const box = document.getElementById('login-message');
+            if (box) {
+                box.textContent = message;
+                box.style.color = success ? '#9cffb0' : '#ffb3b3';
+            }
+        }
+
+        function firebaseErrorMessage(error) {
+            const code = error && error.code ? error.code : '';
+            const messages = {
+                'auth/invalid-email': 'ইমেইল ঠিকানাটি সঠিক নয়।',
+                'auth/user-not-found': 'এই ইমেইলে কোনো অ্যাকাউন্ট পাওয়া যায়নি।',
+                'auth/wrong-password': 'পাসওয়ার্ড ভুল হয়েছে। আবার চেষ্টা করুন।',
+                'auth/invalid-credential': 'ইমেইল অথবা পাসওয়ার্ড ভুল।',
+                'auth/invalid-login-credentials': 'ইমেইল অথবা পাসওয়ার্ড ভুল।',
+                'auth/user-disabled': 'এই অ্যাকাউন্টটি নিষ্ক্রিয় করা হয়েছে।',
+                'auth/too-many-requests': 'অনেকবার চেষ্টা করা হয়েছে। কিছুক্ষণ পর আবার চেষ্টা করুন।',
+                'auth/network-request-failed': 'ইন্টারনেট সংযোগ পরীক্ষা করে আবার চেষ্টা করুন।',
+                'auth/operation-not-allowed': 'Firebase Console-এ Email/Password sign-in চালু করুন।',
+                'auth/unauthorized-domain': 'Firebase Authentication-এর Authorized domains সেটিং পরীক্ষা করুন।',
+                'auth/weak-password': 'পাসওয়ার্ডটি আরও শক্তিশালী হতে হবে।'
+            };
+            return messages[code] || ('লগইন ব্যর্থ হয়েছে। ' +
+                (code ? 'কোড: ' + code : 'ইন্টারনেট ও Firebase সেটিং পরীক্ষা করুন।'));
+        }
+
+        function applyKeyboardAuthState(user) {
+            const lockScreen = document.getElementById('lock-screen');
+            const appWrapper = document.getElementById('force-landscape-wrapper');
+            if (!lockScreen || !appWrapper) return;
+
+            if (!user) {
+                lockScreen.style.display = 'flex';
+                appWrapper.style.display = 'none';
+                keyboardSessionReady = false;
+                return;
+            }
+
+            lockScreen.style.display = 'none';
+            appWrapper.style.display = 'flex';
+
+            if (!keyboardSessionReady) {
+                keyboardSessionReady = true;
+                initAudio();
+                initMidiIn();
+            }
+        }
+
+        try {
+            if (typeof firebase === 'undefined' ||
+                !firebase.apps ||
+                typeof firebase.auth !== 'function') {
+                throw new Error('Firebase SDK লোড হয়নি।');
+            }
+
+            if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+            keyboardAuth = firebase.auth();
+            authPersistenceReady = keyboardAuth.setPersistence(
+                firebase.auth.Auth.Persistence.LOCAL
+            );
+
+            keyboardAuth.onAuthStateChanged(
+                user => {
+                    applyKeyboardAuthState(user);
+                    if (user) showLoginMessage('', true);
+                },
+                error => {
+                    console.error('Firebase auth-state error:', error);
+                    applyKeyboardAuthState(null);
+                    showLoginMessage(firebaseErrorMessage(error));
+                }
+            );
+        } catch (error) {
+            console.error('Firebase initialization error:', error);
+            applyKeyboardAuthState(null);
+            showLoginMessage('Firebase চালু করা যায়নি। SDK ফাইল ও ইন্টারনেট পরীক্ষা করুন।');
+        }
+
+        async function submitLogin() {
+            const email = document.getElementById('emailInput').value.trim();
+            const password = document.getElementById('passwordInput').value;
+            const button = document.querySelector('.login-btn');
+
+            if (!email || !password) {
+                showLoginMessage('ইমেইল ও পাসওয়ার্ড—দুটিই লিখুন।');
+                return;
+            }
+
+            if (!keyboardAuth) {
+                showLoginMessage('Firebase প্রস্তুত নয়। অ্যাপ বন্ধ করে আবার খুলুন এবং ইন্টারনেট পরীক্ষা করুন।');
+                return;
+            }
+
+            if (button) button.disabled = true;
+            showLoginMessage('লগইন যাচাই করা হচ্ছে…');
+
+            try {
+                await authPersistenceReady;
+                await keyboardAuth.signInWithEmailAndPassword(email, password);
+                showLoginMessage('লগইন সফল।', true);
+            } catch (error) {
+                console.error('Firebase login failed:', error);
+                showLoginMessage(firebaseErrorMessage(error));
+            } finally {
+                if (button) button.disabled = false;
+            }
+        }
+
+        function checkEnter(event) {
+            if (event.key === 'Enter') submitLogin();
+        }
+
+        window.submitLogin = submitLogin;
+        window.checkEnter = checkEnter;
+
+        let audioCtx = null;
+        let delayNode = null, delayFeedbackNode = null, delayGainNode = null, delayLowFilter = null, delayHighFilter = null;
+        let convolverNode = null, reverbGainNode = null, masterGain = null, compressorNode = null, styleGain = null;
+        let mediaRecorder = null;
+        let recordedChunks = [];
+        let isRecording = false;
+        let destStreamNode = null;
+
+        let styleBank = JSON.parse(localStorage.getItem('farhad_style_bank') || '[]');
+        const bundledStyleFiles = [{"name": "Bangla Beat.mp3", "file": "style_loops/Bangla Beat.mp3"}, {"name": "bangla rythom m.mp3", "file": "style_loops/bangla rythom m.mp3"}, {"name": "bangla rythom new m.mp3", "file": "style_loops/bangla rythom new m.mp3"}, {"name": "bangla rythom222 m.mp3", "file": "style_loops/bangla rythom222 m.mp3"}, {"name": "Classic Kaharba.mp3", "file": "style_loops/Classic Kaharba.mp3"}, {"name": "dadra ridom with cord m.mp3", "file": "style_loops/dadra ridom with cord m.mp3"}, {"name": "Dip Kaharba.mp3", "file": "style_loops/Dip Kaharba.mp3"}, {"name": "Fast Jhumur.mp3", "file": "style_loops/Fast Jhumur.mp3"}, {"name": "Fast Speed Jhumur.mp3", "file": "style_loops/Fast Speed Jhumur.mp3"}, {"name": "Jhumur Mordan.mp3", "file": "style_loops/Jhumur Mordan.mp3"}, {"name": "Jhumur Tal 2.mp3", "file": "style_loops/Jhumur Tal 2.mp3"}, {"name": "Jhumur Tal 3.mp3", "file": "style_loops/Jhumur Tal 3.mp3"}, {"name": "Jhumur.mp3", "file": "style_loops/Jhumur.mp3"}, {"name": "Joss Jhumur.mp3", "file": "style_loops/Joss Jhumur.mp3"}, {"name": "Joss Kaharba derlo.mp3", "file": "style_loops/Joss Kaharba derlo.mp3"}, {"name": "Joss Kaharba.mp3", "file": "style_loops/Joss Kaharba.mp3"}, {"name": "kaharba (2).mp3", "file": "style_loops/kaharba (2).mp3"}, {"name": "kaharba 2.mp3", "file": "style_loops/kaharba 2.mp3"}, {"name": "KAHARBA 2.wav", "file": "style_loops/KAHARBA 2.wav"}, {"name": "Kaharba 3.mp3", "file": "style_loops/Kaharba 3.mp3"}, {"name": "Kaharba bangla.mp3", "file": "style_loops/Kaharba bangla.mp3"}, {"name": "Kaharba beat.mp3", "file": "style_loops/Kaharba beat.mp3"}, {"name": "kaharba mrinal.mp3", "file": "style_loops/kaharba mrinal.mp3"}, {"name": "kaharba new.wav", "file": "style_loops/kaharba new.wav"}, {"name": "Kaharba tal.mp3", "file": "style_loops/Kaharba tal.mp3"}, {"name": "kaharba ৪.mp3", "file": "style_loops/kaharba ৪.mp3"}, {"name": "Kaharba.mp3", "file": "style_loops/Kaharba.mp3"}, {"name": "Model Kaharba.mp3", "file": "style_loops/Model Kaharba.mp3"}, {"name": "New Kharba 1.wav", "file": "style_loops/New Kharba 1.wav"}, {"name": "New Kharba.wav", "file": "style_loops/New Kharba.wav"}, {"name": "Original dadra.mp3", "file": "style_loops/Original dadra.mp3"}, {"name": "Pahari jumur 1.wav", "file": "style_loops/Pahari jumur 1.wav"}, {"name": "Pahari jumur.wav", "file": "style_loops/Pahari jumur.wav"}, {"name": "RAB Kharba.wav", "file": "style_loops/RAB Kharba.wav"}, {"name": "rythom JHUMUR.mp3", "file": "style_loops/rythom JHUMUR.mp3"}, {"name": "Tima Datra.mp3", "file": "style_loops/Tima Datra.mp3"}, {"name": "Tima Jhumur.mp3", "file": "style_loops/Tima Jhumur.mp3"}, {"name": "Tima Kaharba 2.mp3", "file": "style_loops/Tima Kaharba 2.mp3"}, {"name": "Tima Kaharba 3.mp3", "file": "style_loops/Tima Kaharba 3.mp3"}];
+        bundledStyleFiles.forEach(item => {
+            if (!styleBank.some(s => s.bundled && s.name === item.name)) {
+                styleBank.push({
+                    id: 'bundled-style-' + item.name,
+                    name: item.name,
+                    file: item.file,
+                    bundled: true,
+                    audioBuffer: null,
+                    isPlaying: false
+                });
+            }
+        });
+        let activeStyleIndex = -1;
+        let stylePlaybackEnabled = false;
+        let currentStyleSource = null;
+        let currentBpm = 120;
+
+        let globalVolume = (() => { const v = parseFloat(localStorage.getItem('farhad_vol')); return Number.isFinite(v) ? Math.max(0, Math.min(1, v)) : 0.85; })();
+        let styleVolume = (() => { const v = parseFloat(localStorage.getItem('farhad_style_vol')); return Number.isFinite(v) ? Math.max(0, Math.min(1, v)) : 0.8; })();
+        let releaseTime = parseFloat(localStorage.getItem('farhad_rel')) || 0.15;
+        
+        let revRoomSize = parseInt(localStorage.getItem('farhad_rev_room')) || 50;
+        let revPreDelay = parseInt(localStorage.getItem('farhad_rev_predelay')) || 20;
+        let revDecay = parseInt(localStorage.getItem('farhad_rev_decay')) || 60;
+        let revDepth = parseInt(localStorage.getItem('farhad_rev_depth')) || 40;
+        let revDamping = parseInt(localStorage.getItem('farhad_rev_damping')) || 50;
+
+        let delTime = parseInt(localStorage.getItem('farhad_del_time')) || 30;
+        let delFeedback = parseInt(localStorage.getItem('farhad_del_fb')) || 30;
+        let delLowCut = parseInt(localStorage.getItem('farhad_del_low')) || 10;
+        let delHighCut = parseInt(localStorage.getItem('farhad_del_high')) || 40;
+        let delSpread = parseInt(localStorage.getItem('farhad_del_spread')) || 50;
+        let delMix = parseInt(localStorage.getItem('farhad_del_mix')) || 40;
+
+        let currentToneIndex = parseInt(localStorage.getItem('farhad_tone_idx')) || 0;
+        let semitoneShift = parseInt(localStorage.getItem('farhad_semitone')) || 0;
+        let whiteKeyWidth = parseInt(localStorage.getItem('farhad_key_width')) || 48;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: 'interactive' });
+                masterGain = audioCtx.createGain();
+                masterGain.gain.setValueAtTime(globalVolume, audioCtx.currentTime);
+
+                compressorNode = audioCtx.createDynamicsCompressor();
+                styleGain = audioCtx.createGain();
+                styleGain.gain.setValueAtTime(styleVolume, audioCtx.currentTime);
+                styleGain.connect(compressorNode);
+                delayNode = audioCtx.createDelay(2.0);
+                delayFeedbackNode = audioCtx.createGain();
+                delayGainNode = audioCtx.createGain();
+                delayLowFilter = audioCtx.createBiquadFilter();
+                delayLowFilter.type = 'lowpass';
+                delayHighFilter = audioCtx.createBiquadFilter();
+                delayHighFilter.type = 'highpass';
+
+                updateDelayAudioParameters();
+
+                delayNode.connect(delayLowFilter);
+                delayLowFilter.connect(delayHighFilter);
+                delayHighFilter.connect(delayFeedbackNode);
+                delayFeedbackNode.connect(delayNode);
+                delayHighFilter.connect(delayGainNode);
+                delayGainNode.connect(masterGain);
+
+                convolverNode = audioCtx.createConvolver();
+                reverbGainNode = audioCtx.createGain();
+                updateReverbAudioParameters();
+                convolverNode.connect(reverbGainNode);
+                reverbGainNode.connect(masterGain);
+
+                destStreamNode = audioCtx.createMediaStreamDestination();
+                masterGain.connect(compressorNode);
+                compressorNode.connect(audioCtx.destination);
+                compressorNode.connect(destStreamNode);
+            }
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            resetSleepTimer();
+            refreshDisplayValues();
+        }
+
+        function toggleRecording() {
+    const recBtn = document.getElementById('recordBtn');
+    try {
+        initAudio();
+        if (!destStreamNode || !destStreamNode.stream ||
+            typeof MediaRecorder === 'undefined') {
+            showOnScreenNotification("রেকর্ডিং এই ডিভাইসে সমর্থিত নয়!");
+            return;
+        }
+
+        if (!isRecording) {
+            recordedChunks = [];
+            let options = {};
+
+            if (MediaRecorder.isTypeSupported &&
+                MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+                options.mimeType = 'audio/webm;codecs=opus';
+            } else if (MediaRecorder.isTypeSupported &&
+                       MediaRecorder.isTypeSupported('audio/webm')) {
+                options.mimeType = 'audio/webm';
+            }
+
+            const activeRecorder = new MediaRecorder(destStreamNode.stream, options);
+            mediaRecorder = activeRecorder;
+            activeRecorder._saveFilename =
+                `Farhad_Keyboard_Recording_${Date.now()}.webm`;
+            activeRecorder._saveFileHandlePromise = null;
+
+            activeRecorder.ondataavailable = event => {
+                if (event.data && event.data.size > 0) {
+                    recordedChunks.push(event.data);
+                }
+            };
+
+            activeRecorder.onerror = () => {
+                isRecording = false;
+                if (recBtn) {
+                    recBtn.classList.remove('recording');
+                    recBtn.innerText = 'REC';
+                }
+                showOnScreenNotification("রেকর্ডিংয়ে সমস্যা হয়েছে!");
+            };
+
+            activeRecorder.onstop = async () => {
+                const mime = activeRecorder.mimeType ||
+                    (recordedChunks[0] && recordedChunks[0].type) ||
+                    'audio/webm';
+                const blob = new Blob(recordedChunks, {type: mime});
+
+                if (!blob.size) {
+                    showOnScreenNotification("রেকর্ডিং খালি হয়েছে!");
+                    return;
+                }
+
+                const filename = activeRecorder._saveFilename;
+
+                if (window.Android &&
+                    typeof window.Android.saveRecording === 'function') {
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                        try {
+                            const dataUrl = String(reader.result || '');
+                            const comma = dataUrl.indexOf(',');
+                            if (comma < 0) throw new Error('Invalid audio data');
+                            window.Android.saveRecording(
+                                dataUrl.slice(comma + 1), filename, mime
+                            );
+                        } catch (e) {
+                            showOnScreenNotification("ফাইল সেভ করা যায়নি!");
+                        }
+                    };
+                    reader.onerror = () =>
+                        showOnScreenNotification("রেকর্ডিং পড়া যায়নি!");
+                    reader.readAsDataURL(blob);
+
+                } else if (activeRecorder._saveFileHandlePromise) {
+                    try {
+                        const fileHandle =
+                            await activeRecorder._saveFileHandlePromise;
+                        const writable = await fileHandle.createWritable();
+                        await writable.write(blob);
+                        await writable.close();
+                        showOnScreenNotification("রেকর্ডিং সেভ হয়েছে!");
+                    } catch (e) {
+                        if (e && e.name === 'AbortError') {
+                            showOnScreenNotification("ফাইল সেভ বাতিল হয়েছে!");
+                        } else {
+                            showOnScreenNotification("ফাইল সেভ করা যায়নি!");
+                        }
+                    }
+
+                } else {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    setTimeout(() => URL.revokeObjectURL(url), 1500);
+                    showOnScreenNotification("রেকর্ডিং ডাউনলোড শুরু হয়েছে!");
+                }
+            };
+
+            activeRecorder.start();
+            isRecording = true;
+            if (recBtn) {
+                recBtn.classList.add('recording');
+                recBtn.innerText = 'REC●';
+            }
+            showOnScreenNotification("রেকর্ডিং শুরু হয়েছে...");
+
+        } else if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+            if (!(window.Android &&
+                  typeof window.Android.saveRecording === 'function') &&
+                typeof window.showSaveFilePicker === 'function') {
+                try {
+                    mediaRecorder._saveFileHandlePromise =
+                        window.showSaveFilePicker({
+                            suggestedName: mediaRecorder._saveFilename,
+                            types: [{
+                                description: 'Audio recording',
+                                accept: {'audio/webm': ['.webm']}
+                            }]
+                        });
+                } catch (e) {
+                    mediaRecorder._saveFileHandlePromise = null;
+                }
+            }
+
+            mediaRecorder.stop();
+            isRecording = false;
+            if (recBtn) {
+                recBtn.classList.remove('recording');
+                recBtn.innerText = 'REC';
+            }
+        }
+    } catch (e) {
+        isRecording = false;
+        if (recBtn) {
+            recBtn.classList.remove('recording');
+            recBtn.innerText = 'REC';
+        }
+        showOnScreenNotification(
+            "REC চালু হয়নি: " + (e.message || 'অডিও সমস্যা')
+        );
+    }
+}
+
+        
+
+        function updateDelayAudioParameters() {
+            if (!delayNode || !audioCtx) return;
+            let actualMs = (delTime / 100) * 1000;
+            delayNode.delayTime.setValueAtTime(Math.max(0.001, actualMs / 1000), audioCtx.currentTime);
+            if (delayFeedbackNode) delayFeedbackNode.gain.setValueAtTime(delFeedback / 100, audioCtx.currentTime);
+            if (delayGainNode) delayGainNode.gain.setValueAtTime(delMix / 100, audioCtx.currentTime);
+        }
+
+        function updateReverbAudioParameters() {
+            if (!convolverNode || !audioCtx) return;
+            if (reverbGainNode) reverbGainNode.gain.setValueAtTime(revDepth / 100, audioCtx.currentTime);
+            let duration = 0.2 + (revRoomSize / 100) * 3.0;
+            const rate = audioCtx.sampleRate;
+            const length = Math.max(1, Math.floor(rate * duration));
+            const impulse = audioCtx.createBuffer(2, length, rate);
+            const left = impulse.getChannelData(0);
+            const right = impulse.getChannelData(1);
+            for (let i = 0; i < length; i++) {
+                let progress = i / length;
+                let decayFactor = Math.pow(1 - progress, 2);
+                left[i] = (Math.random() * 2 - 1) * decayFactor;
+                right[i] = (Math.random() * 2 - 1) * decayFactor;
+            }
+            convolverNode.buffer = impulse;
+        }
+
+        function initMidiIn() {
+            if (navigator.requestMIDIAccess) {
+                navigator.requestMIDIAccess().then(m => {
+                    updateMidiStatus(m.inputs.size > 0);
+                    m.onstatechange = () => updateMidiStatus(m.inputs.size > 0);
+                    for (let input of m.inputs.values()) input.onmidimessage = handleMIDIMessage;
+                }, () => updateMidiStatus(false));
+            }
+        }
+
+        function updateMidiStatus(isConnected) {
+            const dot = document.getElementById('midiDot');
+            const text = document.getElementById('midiText');
+            if (isConnected) {
+                dot.classList.add('connected');
+                text.innerText = 'MIDI: ON';
+            } else {
+                dot.classList.remove('connected');
+                text.innerText = 'MIDI: OFF';
+            }
+        }
+
+        function handleMIDIMessage(message) {
+            const [command, note, velocity] = message.data;
+            if (command === 144 && velocity > 0) {
+                let keyIndex = note - 48;
+                if (keyIndex >= 0 && keyIndex < baseFrequencies.length) {
+                    const keyEl = pianoContainer.querySelector(`[data-id="${keyIndex}"]`);
+                    if (keyEl) startNoteByElement(keyEl);
+                }
+            } else if (command === 128 || (command === 144 && velocity === 0)) {
+                let keyIndex = note - 48;
+                if (keyIndex >= 0 && keyIndex < baseFrequencies.length) {
+                    stopNoteByKeyId(keyIndex);
+                }
+            }
+        }
+
+        function refreshDisplayValues() {
+            const selectedTone = tones[currentToneIndex] || 'UNKNOWN';
+            document.getElementById('currentToneDisplay').innerText = `T: ${selectedTone}`;
+            document.getElementById('toneDetailBox').innerText = `টোন (${currentToneIndex + 1}/${tones.length}): [ ${selectedTone} ]`;
+            let semiLabel = semitoneShift === 0 ? '0 Key' : (semitoneShift > 0 ? `+${semitoneShift} Key` : `${semitoneShift} Key`);
+            document.getElementById('octaveDetailBox').innerText = `সেমিটোন শিফট: [ ${semiLabel} ]`;
+            document.getElementById('releaseDetailBox').innerText = `রিলিজ টাইম: [ ${releaseTime.toFixed(2)}s ]`;
+        }
+
+        let sleepTimer = null;
+        function resetSleepTimer() {
+            const display = document.getElementById('lcdDisplay');
+            display.classList.remove('sleep');
+            if (sleepTimer) clearTimeout(sleepTimer);
+            sleepTimer = setTimeout(() => { display.classList.add('sleep'); }, 120000);
+        }
+
+        const baseTones = ['GRAND PIANO', 'BRASS SYNTH', 'ORGAN TONE', 'ELECTRIC KEYS'];
+        const bundledToneList = [{"id":"tone_001","name":"02","format":".wav","bytes":809722,"file":"tones/tone_001.wav"},{"id":"tone_002","name":"03","format":".wav","bytes":566950,"file":"tones/tone_002.wav"},{"id":"tone_003","name":"04","format":".wav","bytes":2127874,"file":"tones/tone_003.wav"},{"id":"tone_004","name":"07","format":".wav","bytes":1883258,"file":"tones/tone_004.wav"},{"id":"tone_005","name":"09","format":".wav","bytes":1694030,"file":"tones/tone_005.wav"},{"id":"tone_006","name":"10","format":".wav","bytes":1518642,"file":"tones/tone_006.wav"},{"id":"tone_007","name":"30","format":".wav","bytes":1365414,"file":"tones/tone_007.wav"},{"id":"tone_008","name":"33","format":".wav","bytes":1649722,"file":"tones/tone_008.wav"},{"id":"tone_009","name":"45","format":".wav","bytes":745106,"file":"tones/tone_009.wav"},{"id":"tone_010","name":"99(1)","format":".wav","bytes":1470642,"file":"tones/tone_010.wav"},{"id":"tone_011","name":"05","format":".wav","bytes":1622030,"file":"tones/tone_011.wav"},{"id":"tone_012","name":"06","format":".wav","bytes":1714334,"file":"tones/tone_012.wav"},{"id":"tone_013","name":"12","format":".wav","bytes":1689414,"file":"tones/tone_013.wav"},{"id":"tone_014","name":"17","format":".wav","bytes":1630334,"file":"tones/tone_014.wav"},{"id":"tone_015","name":"21","format":".wav","bytes":1490030,"file":"tones/tone_015.wav"},{"id":"tone_016","name":"27","format":".wav","bytes":1771566,"file":"tones/tone_016.wav"},{"id":"tone_017","name":"46","format":".wav","bytes":1699566,"file":"tones/tone_017.wav"},{"id":"tone_018","name":"53","format":".wav","bytes":1726334,"file":"tones/tone_018.wav"},{"id":"tone_019","name":"1 HARMONIUM CPA","format":".wav","bytes":895932,"file":"tones/tone_019.wav"},{"id":"tone_020","name":"1 Saxo Organ CPA","format":".wav","bytes":1205242,"file":"tones/tone_020.wav"},{"id":"tone_021","name":"1 SaxoPhone CPA","format":".wav","bytes":953342,"file":"tones/tone_021.wav"},{"id":"tone_022","name":"1 Violin CPA","format":".wav","bytes":2601626,"file":"tones/tone_022.wav"},{"id":"tone_023","name":"10 Roland xps 30 Desi 2","format":".wav","bytes":3549734,"file":"tones/tone_023.wav"},{"id":"tone_024","name":"10 Roland xps 30 Gujrathi 2","format":".wav","bytes":2963294,"file":"tones/tone_024.wav"},{"id":"tone_025","name":"2 Saxophone Roland 10 CPA [My Samples]","format":".wav","bytes":3546186,"file":"tones/tone_025.wav"},{"id":"tone_026","name":"3 KORG SaxoPh 1 C4 CPA [My Samples]","format":".mp3","bytes":375098,"file":"tones/tone_026.mp3"},{"id":"tone_027","name":"3 KORG Vibrophone  [My Samples]","format":".mp3","bytes":45033,"file":"tones/tone_027.mp3"},{"id":"tone_028","name":"4 ALTO SAX CPA [My Samples]","format":".mp3","bytes":85394,"file":"tones/tone_028.mp3"},{"id":"tone_029","name":"4 Harmonica CPA [My Samples]","format":".mp3","bytes":324048,"file":"tones/tone_029.mp3"},{"id":"tone_030","name":"4 Roland XPS Pluck Banjo  [My Samples]","format":".wav","bytes":2290636,"file":"tones/tone_030.wav"},{"id":"tone_031","name":"4 VIBRAPHONE CPA [My Samples]","format":".mp3","bytes":335376,"file":"tones/tone_031.mp3"},{"id":"tone_032","name":"4 VIBROPHONE 2 [My Samples]","format":".wav","bytes":7366850,"file":"tones/tone_032.wav"},{"id":"tone_033","name":"7077683007 CPA Sm","format":".wav","bytes":2813312,"file":"tones/tone_033.wav"},{"id":"tone_034","name":"Baja Xp 30 [My Samples]","format":".wav","bytes":2212106,"file":"tones/tone_034.wav"},{"id":"tone_035","name":"Banjo Lite  [My Samples]","format":".wav","bytes":839566,"file":"tones/tone_035.wav"},{"id":"tone_036","name":"Choir String Smooth ORG [My Samples]","format":".mp3","bytes":93683,"file":"tones/tone_036.mp3"},{"id":"tone_037","name":"Elec Organ","format":".wav","bytes":7723818,"file":"tones/tone_037.wav"},{"id":"tone_038","name":"Harmonica","format":".wav","bytes":7370362,"file":"tones/tone_038.wav"},{"id":"tone_039","name":"Maa Melody Lead [My Samples]","format":".wav","bytes":2104662,"file":"tones/tone_039.wav"},{"id":"tone_040","name":"Oboe","format":".wav","bytes":10267818,"file":"tones/tone_040.wav"},{"id":"tone_041","name":"Pip Organ","format":".wav","bytes":8356546,"file":"tones/tone_041.wav"},{"id":"tone_042","name":"Trumpet","format":".wav","bytes":8112182,"file":"tones/tone_042.wav"},{"id":"tone_043","name":"VIBROTONE ROLAND  [My Samples]","format":".wav","bytes":1242408,"file":"tones/tone_043.wav"},{"id":"tone_044","name":"FluteClean2_A2","format":".wav","bytes":247202,"file":"tones/tone_044.wav"},{"id":"tone_045","name":"FluteClean2_A3","format":".wav","bytes":250734,"file":"tones/tone_045.wav"},{"id":"tone_046","name":"FluteClean2_C2","format":".wav","bytes":247456,"file":"tones/tone_046.wav"},{"id":"tone_047","name":"FluteClean2_C3","format":".wav","bytes":206640,"file":"tones/tone_047.wav"},{"id":"tone_048","name":"FluteClean2_C4","format":".wav","bytes":298804,"file":"tones/tone_048.wav"},{"id":"tone_049","name":"FluteClean2_D#2","format":".wav","bytes":207852,"file":"tones/tone_049.wav"},{"id":"tone_050","name":"FluteClean2_D#3","format":".wav","bytes":266224,"file":"tones/tone_050.wav"},{"id":"tone_051","name":"FluteClean2_F#2","format":".wav","bytes":291492,"file":"tones/tone_051.wav"},{"id":"tone_052","name":"FluteClean2_F#3","format":".wav","bytes":188614,"file":"tones/tone_052.wav"},{"id":"tone_053","name":"FluteClean_A#3","format":".wav","bytes":141400,"file":"tones/tone_053.wav"},{"id":"tone_054","name":"FluteClean_A#4","format":".wav","bytes":169708,"file":"tones/tone_054.wav"},{"id":"tone_055","name":"FluteClean_A2","format":".wav","bytes":143544,"file":"tones/tone_055.wav"},{"id":"tone_056","name":"FluteClean_C2","format":".wav","bytes":168356,"file":"tones/tone_056.wav"},{"id":"tone_057","name":"FluteClean_C3","format":".wav","bytes":145404,"file":"tones/tone_057.wav"},{"id":"tone_058","name":"FluteClean_C4","format":".wav","bytes":146080,"file":"tones/tone_058.wav"},{"id":"tone_059","name":"FluteClean_D2","format":".wav","bytes":184718,"file":"tones/tone_059.wav"},{"id":"tone_060","name":"FluteClean_D3","format":".wav","bytes":144148,"file":"tones/tone_060.wav"},{"id":"tone_061","name":"FluteClean_D4","format":".wav","bytes":99508,"file":"tones/tone_061.wav"},{"id":"tone_062","name":"FluteClean_F#2","format":".wav","bytes":162116,"file":"tones/tone_062.wav"},{"id":"tone_063","name":"FluteClean_F#3","format":".wav","bytes":136160,"file":"tones/tone_063.wav"},{"id":"tone_064","name":"FluteClean_F#4","format":".wav","bytes":138142,"file":"tones/tone_064.wav"},{"id":"tone_065","name":"ham","format":".wav","bytes":32108616,"file":"tones/tone_065.wav"},{"id":"tone_066","name":"Banjo Lite  [ORGINAL_Maa_Melody_Tone_-_30 (1)]","format":".wav","bytes":839566,"file":"tones/tone_066.wav"},{"id":"tone_067","name":"harmonium 2","format":".wav","bytes":4445478,"file":"tones/tone_067.wav"},{"id":"tone_068","name":"Maa Melody Lead [ORGINAL_Maa_Melody_Tone_-_30 (1)]","format":".wav","bytes":2104662,"file":"tones/tone_068.wav"},{"id":"tone_069","name":"Baja Xp 30 [My Samples]","format":".wav","bytes":2212106,"file":"tones/tone_069.wav"},{"id":"tone_070","name":"E-Mu-Proteus-2-Flute-C5","format":".wav","bytes":403800,"file":"tones/tone_070.wav"},{"id":"tone_071","name":"Ensoniq-SQ-1-Violin-1-C5","format":".wav","bytes":818110,"file":"tones/tone_071.wav"},{"id":"tone_072","name":"prosessing 1","format":".wav","bytes":1242408,"file":"tones/tone_072.wav"},{"id":"tone_073","name":"Roland-SC-88-Oboe-C5","format":".wav","bytes":290010,"file":"tones/tone_073.wav"},{"id":"tone_074","name":"Saxophone Xps 10","format":".wav","bytes":3546186,"file":"tones/tone_074.wav"},{"id":"tone_075","name":"Sitar ","format":".mp3","bytes":287349,"file":"tones/tone_075.mp3"},{"id":"tone_076","name":"Strings","format":".wav","bytes":1270334,"file":"tones/tone_076.wav"},{"id":"tone_077","name":"ACCORDIAN","format":".wav","bytes":1483180,"file":"tones/tone_077.wav"},{"id":"tone_078","name":"BAJA SHNAI","format":".wav","bytes":1229612,"file":"tones/tone_078.wav"},{"id":"tone_079","name":"BRASS","format":".wav","bytes":1499180,"file":"tones/tone_079.wav"},{"id":"tone_080","name":"FOLK LEAD","format":".wav","bytes":1257260,"file":"tones/tone_080.wav"},{"id":"tone_081","name":"harm f#3","format":".wav","bytes":906528,"file":"tones/tone_081.wav"},{"id":"tone_082","name":"IN SITAR","format":".wav","bytes":761388,"file":"tones/tone_082.wav"},{"id":"tone_083","name":"OBEY G6","format":".wav","bytes":2565016,"file":"tones/tone_083.wav"},{"id":"tone_084","name":"OL;D FLUTE","format":".wav","bytes":986392,"file":"tones/tone_084.wav"},{"id":"tone_085","name":"SAXO PHONE","format":".wav","bytes":1359148,"file":"tones/tone_085.wav"},{"id":"tone_086","name":"STRIN GS","format":".wav","bytes":1779352,"file":"tones/tone_086.wav"},{"id":"tone_087","name":"VIBRO ","format":".wav","bytes":618540,"file":"tones/tone_087.wav"},{"id":"tone_088","name":"(5)_Strings_6375867985","format":".wav","bytes":3295174,"file":"tones/tone_088.wav"},{"id":"tone_089","name":"10_Roland_xps_30_Gujrathi_2","format":".wav","bytes":2963294,"file":"tones/tone_089.wav"},{"id":"tone_090","name":"G6 OBAY","format":".wav","bytes":849964,"file":"tones/tone_090.wav"},{"id":"tone_091","name":"HR2E5","format":".wav","bytes":719754,"file":"tones/tone_091.wav"},{"id":"tone_092","name":"OBEY","format":".wav","bytes":2471402,"file":"tones/tone_092.wav"},{"id":"tone_093","name":"Roland_xps_30_Timli","format":".wav","bytes":3452470,"file":"tones/tone_093.wav"},{"id":"tone_094","name":"Shahnai_xps_10","format":".mp3","bytes":175716,"file":"tones/tone_094.mp3"},{"id":"tone_095","name":"single_Tuti","format":".mp3","bytes":329943,"file":"tones/tone_095.mp3"},{"id":"tone_096","name":"2 Saxophone Roland 10 CPA [Roland60xpskyebord]","format":".wav","bytes":3546186,"file":"tones/tone_096.wav"},{"id":"tone_097","name":"3 KORG SaxoPh 1 C4 CPA [Roland60xpskyebord]","format":".mp3","bytes":375098,"file":"tones/tone_097.mp3"},{"id":"tone_098","name":"3 KORG Vibrophone  [Roland60xpskyebord]","format":".mp3","bytes":45033,"file":"tones/tone_098.mp3"},{"id":"tone_099","name":"4 ALTO SAX CPA [Roland60xpskyebord]","format":".mp3","bytes":85394,"file":"tones/tone_099.mp3"},{"id":"tone_100","name":"4 Harmonica CPA [Roland60xpskyebord]","format":".mp3","bytes":324048,"file":"tones/tone_100.mp3"},{"id":"tone_101","name":"4 Roland XPS Pluck Banjo  [Roland60xpskyebord]","format":".wav","bytes":2290636,"file":"tones/tone_101.wav"},{"id":"tone_102","name":"4 VIBRAPHONE CPA [Roland60xpskyebord]","format":".mp3","bytes":335376,"file":"tones/tone_102.mp3"},{"id":"tone_103","name":"4 VIBROPHONE 2 [Roland60xpskyebord]","format":".wav","bytes":7366850,"file":"tones/tone_103.wav"},{"id":"tone_104","name":"Baja Xp 30 [Roland60xpskyebord]","format":".wav","bytes":2212106,"file":"tones/tone_104.wav"},{"id":"tone_105","name":"Banjo Lite  [Roland60xpskyebord]","format":".wav","bytes":839566,"file":"tones/tone_105.wav"},{"id":"tone_106","name":"Choir String Smooth ORG [Roland60xpskyebord]","format":".mp3","bytes":93683,"file":"tones/tone_106.mp3"},{"id":"tone_107","name":"Maa Melody Lead [Roland60xpskyebord]","format":".wav","bytes":2104662,"file":"tones/tone_107.wav"},{"id":"tone_108","name":"VIBROTONE ROLAND  [Roland60xpskyebord]","format":".wav","bytes":1242408,"file":"tones/tone_108.wav"},{"id":"tone_109","name":"BENJO LIVE F#3","format":".wav","bytes":801324,"file":"tones/tone_109.wav"},{"id":"tone_110","name":"CHORD","format":".wav","bytes":1224748,"file":"tones/tone_110.wav"},{"id":"tone_111","name":"VIBE ALTO SAX B (2)","format":".wav","bytes":1920044,"file":"tones/tone_111.wav"},{"id":"tone_112","name":"VIBE BANJO 3","format":".wav","bytes":830704,"file":"tones/tone_112.wav"},{"id":"tone_113","name":"VIBE BANJO","format":".wav","bytes":1002460,"file":"tones/tone_113.wav"},{"id":"tone_114","name":"VIBE BANSURI 3","format":".wav","bytes":1925696,"file":"tones/tone_114.wav"},{"id":"tone_115","name":"VIBE BANSURI","format":".wav","bytes":1857064,"file":"tones/tone_115.wav"},{"id":"tone_116","name":"VIBE BASSOON ","format":".wav","bytes":1361420,"file":"tones/tone_116.wav"},{"id":"tone_117","name":"VIBE BEEN","format":".wav","bytes":1055404,"file":"tones/tone_117.wav"},{"id":"tone_118","name":"VIBE CLARINET","format":".wav","bytes":1159300,"file":"tones/tone_118.wav"},{"id":"tone_119","name":"VIBE HARMONIUM 2 3","format":".wav","bytes":1231228,"file":"tones/tone_119.wav"},{"id":"tone_120","name":"VIBE HARMONIUM 3","format":".wav","bytes":910508,"file":"tones/tone_120.wav"},{"id":"tone_121","name":"VIBE HARMONIUM","format":".wav","bytes":1299268,"file":"tones/tone_121.wav"},{"id":"tone_122","name":"VIBE MANDL 3","format":".wav","bytes":922628,"file":"tones/tone_122.wav"},{"id":"tone_123","name":"VIBE NADASWARAM","format":".wav","bytes":409452,"file":"tones/tone_123.wav"},{"id":"tone_124","name":"VIBE NAND SWAR 3","format":".wav","bytes":699480,"file":"tones/tone_124.wav"},{"id":"tone_125","name":"VIBE NAND SWAR","format":".wav","bytes":616340,"file":"tones/tone_125.wav"},{"id":"tone_126","name":"VIBE SAHNAI","format":".wav","bytes":1119120,"file":"tones/tone_126.wav"},{"id":"tone_127","name":"VIBE SAROD 2","format":".wav","bytes":157740,"file":"tones/tone_127.wav"},{"id":"tone_128","name":"VIBE SITAR  3","format":".wav","bytes":543844,"file":"tones/tone_128.wav"},{"id":"tone_129","name":"VIBE SITAR ","format":".wav","bytes":792972,"file":"tones/tone_129.wav"},{"id":"tone_130","name":"VIBE SITAR 2","format":".wav","bytes":805800,"file":"tones/tone_130.wav"},{"id":"tone_131","name":"VIBE TRUMPET C","format":".wav","bytes":1149104,"file":"tones/tone_131.wav"},{"id":"tone_132","name":"VIBE TUMBI","format":".wav","bytes":188460,"file":"tones/tone_132.wav"},{"id":"tone_133","name":"VIBE VIBRO 3","format":".wav","bytes":516140,"file":"tones/tone_133.wav"},{"id":"tone_134","name":"VIBE VOILIN","format":".wav","bytes":1603224,"file":"tones/tone_134.wav"}];
+        const bundledAudioBuffers = new Map();
+        const bundledAudioLoads = new Map();
+        let customToneList = JSON.parse(localStorage.getItem('farhad_custom_tones') || '[]');
+        
+        let tones = [...baseTones, ...bundledToneList.map(item => item.name), ...customToneList.map(item => item.name)];
+        currentToneIndex = Math.max(0, Math.min(currentToneIndex, tones.length - 1));
+
+        function updateToneList() {
+            tones = [...baseTones, ...bundledToneList.map(item => item.name), ...customToneList.map(item => item.name)];
+        }
+
+        function showOnScreenNotification(message) {
+            const subEl = document.getElementById('realtimeStatusSub');
+            if (subEl) {
+                subEl.innerText = message;
+                subEl.style.color = '#00ffcc';
+                setTimeout(() => {
+                    subEl.innerText = 'PRESS [ OK ] TO OPEN MENU';
+                    subEl.style.color = '#00ff88';
+                }, 1800);
+            }
+        }
+
+        function onControlAction(actionType, dir) {
+            resetSleepTimer();
+            if (actionType === 'tone') { changeTone(dir); showOnScreenNotification(`টোন: ${tones[currentToneIndex]}`); }
+            else if (actionType === 'rel') { changeRelease(dir * 0.05); showOnScreenNotification(`রিলিজ: ${releaseTime.toFixed(2)}s`); }
+            else if (actionType === 'vol') { globalVolume = Math.max(0, Math.min(1, Math.round((globalVolume + dir * 0.1) * 10) / 10)); localStorage.setItem('farhad_vol', globalVolume); if(masterGain) masterGain.gain.setValueAtTime(globalVolume, audioCtx.currentTime); showOnScreenNotification(`ভলিউম: ${Math.round(globalVolume*100)}%`); }
+            else if (actionType === 'zoom') { const whiteKeyCount = baseFrequencies.filter((_, i) => ![1, 3, 6, 8, 10].includes(i % 12)).length; const fitWidth = Math.max(8, (pianoContainer.clientWidth || window.innerWidth) / whiteKeyCount); whiteKeyWidth = Math.max(fitWidth, whiteKeyWidth + (dir * 5)); localStorage.setItem('farhad_key_width', whiteKeyWidth); renderPiano(); showOnScreenNotification(`কী উইথ: ${whiteKeyWidth.toFixed(1)}px`); }
+            else if (actionType === 'style') { switchStyleLoop(dir); }
+            else if (actionType === 'on') {
+                stylePlaybackEnabled = true;
+                if (activeStyleIndex === -1 && styleBank.length > 0) activeStyleIndex = 0;
+                if (activeStyleIndex >= 0) playStyleByIndex(activeStyleIndex);
+                showOnScreenNotification(`লুপ: [ON]`);
+            }
+            else if (actionType === 'off') {
+                stylePlaybackEnabled = false;
+                stopCurrentStyle();
+                showOnScreenNotification(`লুপ: [OFF]`);
+            }
+        }
+
+        function changeBpm(direction) {
+            resetSleepTimer();
+            currentBpm = Math.max(40, Math.min(240, currentBpm + (direction * 2)));
+            if (currentStyleSource) {
+                try { currentStyleSource.playbackRate = currentBpm / 120; } catch (e) {}
+            }
+            showOnScreenNotification(`BPM: ${currentBpm}`);
+        }
+
+        async function refreshHeldNotesForTone() {
+            const targetIndex = currentToneIndex;
+            const heldKeys = Array.from(activeNotes.keys());
+            if (!heldKeys.length) return;
+
+            try {
+                if (targetIndex >= baseTones.length) {
+                    const offset = targetIndex - baseTones.length;
+
+                    if (offset < bundledToneList.length) {
+                        await loadBundledToneBuffer(offset);
+                    } else {
+                        const customIdx = offset - bundledToneList.length;
+                        const item = customToneList[customIdx];
+
+                        if (item && !customAudioBuffers.has(customIdx) && item.arrayBuffer) {
+                            const buffer = await audioCtx.decodeAudioData(item.arrayBuffer.slice(0));
+                            customAudioBuffers.set(customIdx, buffer);
+                        }
+                    }
+                }
+
+                if (currentToneIndex !== targetIndex) return;
+
+                heldKeys.forEach(keyId => {
+                    const old = activeNotes.get(keyId);
+                    if (!old) return;
+
+                    const now = audioCtx.currentTime;
+                    try {
+                        old.gainNode.gain.cancelScheduledValues(now);
+                        old.gainNode.gain.setValueAtTime(
+                            Math.max(old.gainNode.gain.value, 0.0001), now
+                        );
+                        old.gainNode.gain.linearRampToValueAtTime(0.0001, now + 0.006);
+                    } catch (e) {}
+
+                    [old.osc, old.modLFO, old.source].forEach(node => {
+                        if (node) {
+                            try { node.stop(now + 0.007); } catch (e) {}
+                        }
+                    });
+
+                    activeNotes.delete(keyId);
+
+                    const key = pianoContainer.querySelector(`[data-id="${keyId}"]`);
+                    if (key) startNoteByElement(key);
+                });
+            } catch (e) {
+                showOnScreenNotification('নতুন টোন লোড হচ্ছে, আবার চেষ্টা করুন');
+            }
+        }
+
+        function changeTone(direction) {
+            updateToneList();
+            if(tones.length === 0) return;
+            currentToneIndex = (currentToneIndex + direction + tones.length) % tones.length;
+            localStorage.setItem('farhad_tone_idx', currentToneIndex);
+            if (audioCtx && audioCtx.state === 'running') refreshHeldNotesForTone();
+            refreshDisplayValues();
+            if(currentPage === 'sub' && pageIds[selectedMenuIndex] === 'tonebank') {
+                renderToneBankUI();
+            }
+        }
+
+        function selectToneByNumber(toneNum) {
+            updateToneList();
+            let index = toneNum - 1;
+            if (index >= 0 && index < tones.length) {
+                currentToneIndex = index;
+                localStorage.setItem('farhad_tone_idx', currentToneIndex);
+                refreshDisplayValues();
+                showOnScreenNotification(`টোন [${toneNum}]: ${tones[currentToneIndex]}`);
+                if(currentPage === 'sub' && pageIds[selectedMenuIndex] === 'tonebank') {
+                    renderToneBankUI();
+                }
+            } else {
+                showOnScreenNotification(`টোন ${toneNum} পাওয়া যায়নি!`);
+            }
+        }
+
+        function changeRelease(amount) {
+            releaseTime = Math.max(0.02, Math.min(1.0, releaseTime + amount));
+            localStorage.setItem('farhad_rel', releaseTime);
+            refreshDisplayValues();
+        }
+
+        function changeStyleVolume(direction) {
+            styleVolume = Math.max(0, Math.min(1, Math.round((styleVolume + direction * 0.1) * 10) / 10));
+            localStorage.setItem('farhad_style_vol', styleVolume);
+            if (!audioCtx) initAudio();
+            if (styleGain && audioCtx) styleGain.gain.setValueAtTime(styleVolume, audioCtx.currentTime);
+            showOnScreenNotification(`E-STYLE VOL: ${Math.round(styleVolume * 100)}%`);
+        }
+
+        function switchStyleLoop(direction) {
+            initAudio();
+            if (styleBank.length === 0) { showOnScreenNotification('লুপ নেই!'); return; }
+            activeStyleIndex = activeStyleIndex === -1 ? 0 : (activeStyleIndex + direction + styleBank.length) % styleBank.length;
+            if (stylePlaybackEnabled) playStyleByIndex(activeStyleIndex);
+            if(currentPage === 'sub' && pageIds[selectedMenuIndex] === 'stylebank') {
+                renderStyleBankUI();
+            }
+        }
+
+
+        function audioBufferToWavBlob(buffer) {
+            const channels = buffer.numberOfChannels;
+            const frames = buffer.length;
+            const bytesPerSample = 2;
+            const dataSize = frames * channels * bytesPerSample;
+            const out = new ArrayBuffer(44 + dataSize);
+            const view = new DataView(out);
+            const write = (offset, str) => {
+                for (let i = 0; i < str.length; i++)
+                    view.setUint8(offset + i, str.charCodeAt(i));
+            };
+            write(0, 'RIFF');
+            view.setUint32(4, 36 + dataSize, true);
+            write(8, 'WAVE');
+            write(12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true);
+            view.setUint16(22, channels, true);
+            view.setUint32(24, buffer.sampleRate, true);
+            view.setUint32(28, buffer.sampleRate * channels * bytesPerSample, true);
+            view.setUint16(32, channels * bytesPerSample, true);
+            view.setUint16(34, 16, true);
+            write(36, 'data');
+            view.setUint32(40, dataSize, true);
+
+            const channelData = [];
+            for (let c = 0; c < channels; c++)
+                channelData.push(buffer.getChannelData(c));
+
+            let offset = 44;
+            for (let i = 0; i < frames; i++) {
+                for (let c = 0; c < channels; c++) {
+                    const sample = Math.max(-1, Math.min(1, channelData[c][i]));
+                    view.setInt16(offset, sample < 0 ? sample * 32768 : sample * 32767, true);
+                    offset += 2;
+                }
+            }
+            return new Blob([out], { type: 'audio/wav' });
+        }
+
+        let currentStyleMediaNode = null;
+        let currentStyleObjectUrl = null;
+
+        function stopStylePlaybackOnly() {
+            if (currentStyleSource) {
+                try { currentStyleSource.pause(); } catch (e) {}
+                currentStyleSource = null;
+            }
+            currentStyleMediaNode = null;
+            currentStyleObjectUrl = null;
+        }
+
+        function prepareStyleAudio(styleItem) {
+            if (styleItem.cachedAudio) return styleItem.cachedAudio;
+
+            let src = styleItem.file || '';
+            if (!styleItem.bundled) {
+                if (!styleItem.audioBuffer) return null;
+                styleItem.cachedObjectUrl = URL.createObjectURL(
+                    audioBufferToWavBlob(styleItem.audioBuffer)
+                );
+                src = styleItem.cachedObjectUrl;
+            }
+            if (!src) return null;
+
+            const audio = new Audio();
+            audio.preload = 'auto';
+            audio.loop = true;
+            audio.src = src;
+
+            if ('preservesPitch' in audio) audio.preservesPitch = true;
+            if ('webkitPreservesPitch' in audio) audio.webkitPreservesPitch = true;
+            if ('mozPreservesPitch' in audio) audio.mozPreservesPitch = true;
+
+            styleItem.cachedAudio = audio;
+            try {
+                styleItem.cachedMediaNode = audioCtx.createMediaElementSource(audio);
+                styleItem.cachedMediaNode.connect(styleGain || masterGain);
+            } catch (e) {
+                styleItem.cachedAudio = null;
+                return null;
+            }
+
+            return audio;
+        }
+
+        function preloadNearbyStyles(index) {
+            [index - 1, index + 1].forEach(i => {
+                if (i < 0 || i >= styleBank.length) return;
+                const item = styleBank[i];
+                if (item.bundled && item.file) {
+                    try {
+                        const audio = prepareStyleAudio(item);
+                        if (audio) audio.load();
+                    } catch (e) {}
+                }
+            });
+        }
+
+        function playStyleByIndex(index) {
+            if (!stylePlaybackEnabled) return;
+            if (index < 0 || index >= styleBank.length) return;
+            const styleItem = styleBank[index];
+            if (!audioCtx) initAudio();
+
+            if (!styleItem.audioBuffer && styleItem.file && !styleItem.bundled) {
+                if (styleItem.loading) return;
+                styleItem.loading = true;
+                const xhr = new XMLHttpRequest();
+                xhr.open('GET', styleItem.file, true);
+                xhr.responseType = 'arraybuffer';
+                xhr.onload = () => {
+                    if (xhr.status !== 0 && (xhr.status < 200 || xhr.status >= 300)) {
+                        styleItem.loading = false;
+                        showOnScreenNotification('লুপ ফাইল লোড হয়নি!');
+                        return;
+                    }
+                    audioCtx.decodeAudioData(xhr.response.slice(0), buffer => {
+                        styleItem.audioBuffer = buffer;
+                        styleItem.loading = false;
+                        playStyleByIndex(index);
+                    }, () => {
+                        styleItem.loading = false;
+                        showOnScreenNotification('লুপ অডিও চালানো যাচ্ছে না!');
+                    });
+                };
+                xhr.onerror = () => {
+                    styleItem.loading = false;
+                    showOnScreenNotification('লুপ ফাইল পড়া যায়নি!');
+                };
+                xhr.send();
+                return;
+            }
+
+            if (!styleItem.bundled && !styleItem.audioBuffer) {
+                showOnScreenNotification('লুপ অডিও প্রস্তুত নয়!');
+                return;
+            }
+
+            stopStylePlaybackOnly();
+            styleBank.forEach(item => item.isPlaying = false);
+
+            try {
+                const audio = prepareStyleAudio(styleItem);
+                if (!audio) {
+                    showOnScreenNotification('লুপ অডিও চালানো যায়নি!');
+                    renderStyleBankUI();
+                    return;
+                }
+
+                audio.playbackRate = currentBpm / 120;
+                try { audio.currentTime = 0; } catch (e) {}
+
+                currentStyleSource = audio;
+                currentStyleMediaNode = styleItem.cachedMediaNode;
+                currentStyleObjectUrl = styleItem.cachedObjectUrl || null;
+                styleItem.isPlaying = true;
+                activeStyleIndex = index;
+
+                preloadNearbyStyles(index);
+
+                audio.play().then(() => {
+                    showOnScreenNotification(`লুপ: ${styleItem.name.substring(0, 10)}`);
+                }).catch(() => {
+                    if (currentStyleSource === audio) stopStylePlaybackOnly();
+                    styleItem.isPlaying = false;
+                    showOnScreenNotification('লুপ অডিও চালানো যায়নি!');
+                    renderStyleBankUI();
+                });
+
+                renderStyleBankUI();
+            } catch (e) {
+                stopStylePlaybackOnly();
+                styleItem.isPlaying = false;
+                showOnScreenNotification('লুপ অডিও চালানো যায়নি!');
+                renderStyleBankUI();
+            }
+        }
+
+        function stopCurrentStyle() {
+            stopStylePlaybackOnly();
+            styleBank.forEach(item => item.isPlaying = false);
+            renderStyleBankUI();
+        }
+
+
+        function updateReverbSubUI() {
+            for (let i = 0; i < 5; i++) {
+                const row = document.getElementById(`rev-opt-${i}`);
+                if (row) {
+                    if (i === reverbSubIndex) { row.classList.add('active-setting'); row.style.border = reverbSubActive ? '1px dashed #00ffcc' : 'none'; }
+                    else { row.classList.remove('active-setting'); row.style.border = 'none'; }
+                }
+            }
+        }
+
+        function updateDelaySubUI() {
+            for (let i = 0; i < 6; i++) {
+                const row = document.getElementById(`del-opt-${i}`);
+                if (row) {
+                    if (i === delaySubIndex) { row.classList.add('active-setting'); row.style.border = delaySubActive ? '1px dashed #00ffcc' : 'none'; }
+                    else { row.classList.remove('active-setting'); row.style.border = 'none'; }
+                }
+            }
+        }
+
+        function updateWallpaperSubUI() {
+            for (let i = 0; i < 4; i++) {
+                const row = document.getElementById(`wp-opt-${i}`);
+                if (row) {
+                    if (i === wallpaperSubIndex) { row.classList.add('active-setting'); row.style.border = wallpaperSubActive ? '1px dashed #ff00ea' : 'none'; }
+                    else { row.classList.remove('active-setting'); row.style.border = 'none'; }
+                }
+            }
+        }
+
+        function changeReverbParam(direction) {
+            resetSleepTimer();
+            initAudio();
+            if (!reverbSubActive) { reverbSubIndex = (reverbSubIndex + direction + 5) % 5; updateReverbSubUI(); }
+            else {
+                let step = direction * 5;
+                if (reverbSubIndex === 0) revRoomSize = Math.max(0, Math.min(100, revRoomSize + step));
+                else if (reverbSubIndex === 1) revPreDelay = Math.max(0, Math.min(100, revPreDelay + step));
+                else if (reverbSubIndex === 2) revDecay = Math.max(0, Math.min(100, revDecay + step));
+                else if (reverbSubIndex === 3) { revDepth = Math.max(0, Math.min(100, revDepth + step)); if(reverbGainNode) reverbGainNode.gain.setValueAtTime(revDepth/100, audioCtx.currentTime); }
+                else if (reverbSubIndex === 4) revDamping = Math.max(0, Math.min(100, revDamping + step));
+                updateReverbAudioParameters();
+            }
+        }
+
+        function changeDelayParam(direction) {
+            resetSleepTimer();
+            initAudio();
+            if (!delaySubActive) { delaySubIndex = (delaySubIndex + direction + 6) % 6; updateDelaySubUI(); }
+            else {
+                let step = direction * 5;
+                if (delaySubIndex === 0) delTime = Math.max(0, Math.min(100, delTime + step));
+                else if (delaySubIndex === 1) delFeedback = Math.max(0, Math.min(100, delFeedback + step));
+                else if (delaySubIndex === 2) delLowCut = Math.max(0, Math.min(100, delLowCut + step));
+                else if (delaySubIndex === 3) delHighCut = Math.max(0, Math.min(100, delHighCut + step));
+                else if (delaySubIndex === 4) delSpread = Math.max(0, Math.min(100, delSpread + step));
+                else if (delaySubIndex === 5) delMix = Math.max(0, Math.min(100, delMix + step));
+                updateDelayAudioParameters();
+            }
+        }
+
+        function changeWallpaperParam(direction) {
+            resetSleepTimer();
+            if (!wallpaperSubActive) {
+                wallpaperSubIndex = (wallpaperSubIndex + direction + 4) % 4;
+                updateWallpaperSubUI();
+            } else {
+                if (wallpaperSubIndex === 0) {
+                    customBgImageURL = null;
+                    localStorage.removeItem('farhad_custom_bg');
+                    currentThemeIndex = (currentThemeIndex + direction + themesList.length) % themesList.length;
+                    localStorage.setItem('farhad_theme_idx', currentThemeIndex);
+                    applyCurrentTheme();
+                    showOnScreenNotification(`থিম: ${themesList[currentThemeIndex].name}`);
+                } else if (wallpaperSubIndex === 2) {
+                    currentScrollColorIndex = (currentScrollColorIndex + direction + scrollColorsList.length) % scrollColorsList.length;
+                    localStorage.setItem('farhad_scroll_color_idx', currentScrollColorIndex);
+                    applyScrollColor();
+                    showOnScreenNotification(`কালার: ${scrollColorsList[currentScrollColorIndex].name}`);
+                }
+            }
+        }
+
+        function loadCustomBackgroundImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    customBgImageURL = e.target.result;
+                    localStorage.setItem('farhad_custom_bg', customBgImageURL);
+                    applyCurrentTheme();
+                    showOnScreenNotification("কাস্টম ব্যাকগ্রাউন্ড সেট হয়েছে!");
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function changeOctave(direction) {
+    semitoneShift = (Number(semitoneShift) || 0) + (direction < 0 ? -1 : 1);
+    localStorage.setItem('farhad_semitone', String(semitoneShift));
+    renderPiano();
+    if (typeof updateActiveNotesPitch === 'function') updateActiveNotesPitch();
+    refreshDisplayValues();
+    showOnScreenNotification('পিচ শিফট: ' + (semitoneShift > 0 ? '+' : '') + semitoneShift + ' semitone');
+}
+
+        let currentPage = 'home';
+        let selectedMenuIndex = 0;
+        const totalMenuItems = 11;
+        const pageIds = ['tone', 'octave', 'reverb', 'delay', 'release', 'loadtone', 'touch', 'loadstyle', 'wallpaper', 'tonebank', 'stylebank'];
+
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(`page-${pageId}`).classList.add('active');
+        }
+
+        function updateMenuSelection() {
+            for (let i = 0; i < totalMenuItems; i++) {
+                const item = document.getElementById(`menu-${i}`);
+                if (item) {
+                    if (i === selectedMenuIndex) item.classList.add('selected');
+                    else item.classList.remove('selected');
+                }
+            }
+            document.getElementById('menuList').style.transform = `translateY(${-selectedMenuIndex * 24}px)`;
+        }
+
+        function adjustActiveFunction(direction) {
+            if (currentPage === 'sub') {
+                const activeSub = pageIds[selectedMenuIndex];
+                if (activeSub === 'tone') changeTone(direction);
+                else if (activeSub === 'octave') changeOctave(direction);
+                else if (activeSub === 'reverb') changeReverbParam(direction);
+                else if (activeSub === 'delay') changeDelayParam(direction);
+                else if (activeSub === 'release') changeRelease(direction * 0.05);
+                else if (activeSub === 'wallpaper') changeWallpaperParam(direction);
+                else if (activeSub === 'tonebank') {
+                    changeTone(direction);
+                }
+                else if (activeSub === 'stylebank') {
+                    switchStyleLoop(direction);
+                }
+            }
+        }
+
+        function handleNext() {
+            resetSleepTimer();
+            if (currentPage === 'menu' && selectedMenuIndex < totalMenuItems - 1) { selectedMenuIndex++; updateMenuSelection(); }
+            else if (currentPage === 'sub') { adjustActiveFunction(1); }
+        }
+
+        function handlePrev() {
+            resetSleepTimer();
+            if (currentPage === 'menu' && selectedMenuIndex > 0) { selectedMenuIndex--; updateMenuSelection(); }
+            else if (currentPage === 'sub') { adjustActiveFunction(-1); }
+        }
+
+        function handleOk() {
+            resetSleepTimer();
+            if (currentPage === 'home') { currentPage = 'menu'; showPage('menu'); updateMenuSelection(); }
+            else if (currentPage === 'menu') {
+                const subPage = pageIds[selectedMenuIndex];
+                if (subPage === 'loadtone') document.getElementById('audioUpload').click();
+                else if (subPage === 'loadstyle') document.getElementById('styleUpload').click();
+                else {
+                    currentPage = 'sub';
+                    showPage(subPage);
+                    if (subPage === 'reverb') { reverbSubActive = false; reverbSubIndex = 0; updateReverbSubUI(); }
+                    else if (subPage === 'delay') { delaySubActive = false; delaySubIndex = 0; updateDelaySubUI(); }
+                    else if (subPage === 'wallpaper') { wallpaperSubActive = false; wallpaperSubIndex = 0; updateWallpaperSubUI(); }
+                    else if (subPage === 'tonebank') { renderToneBankUI(); }
+                    else if (subPage === 'stylebank') { renderStyleBankUI(); }
+                }
+            } else if (currentPage === 'sub') {
+                const subPage = pageIds[selectedMenuIndex];
+                if (subPage === 'reverb') { reverbSubActive = !reverbSubActive; updateReverbSubUI(); }
+                else if (subPage === 'delay') { delaySubActive = !delaySubActive; updateDelaySubUI(); }
+                else if (subPage === 'wallpaper') {
+                    if (wallpaperSubIndex === 1) {
+                        document.getElementById('bgUpload').click();
+                    } else if (wallpaperSubIndex === 3) {
+                        let newNum = prompt("আপনার কাস্টম নম্বরটি লিখুন:");
+                        if (newNum && newNum.trim() !== "") {
+                            userCustomNumbers.push(newNum.trim());
+                            localStorage.setItem('farhad_custom_nums', JSON.stringify(userCustomNumbers));
+                            buildTickerContent();
+                            showOnScreenNotification("নম্বার যোগ হয়েছে!");
+                        }
+                    } else {
+                        wallpaperSubActive = !wallpaperSubActive;
+                        updateWallpaperSubUI();
+                    }
+                }
+            }
+        }
+
+        function goBack() {
+            resetSleepTimer();
+            if (currentPage === 'sub') {
+                if (pageIds[selectedMenuIndex] === 'reverb' && reverbSubActive) { reverbSubActive = false; updateReverbSubUI(); return; }
+                if (pageIds[selectedMenuIndex] === 'delay' && delaySubActive) { delaySubActive = false; updateDelaySubUI(); return; }
+                if (pageIds[selectedMenuIndex] === 'wallpaper' && wallpaperSubActive) { wallpaperSubActive = false; updateWallpaperSubUI(); return; }
+                currentPage = 'menu'; showPage('menu'); updateMenuSelection();
+            } else if (currentPage === 'menu') {
+                currentPage = 'home'; showPage('home');
+            }
+        }
+
+        const customAudioBuffers = new Map();
+
+        function loadCustomAudioToneDirect(event) {
+    const input = event && event.target;
+    const file = input && input.files && input.files[0];
+    if (!file) return;
+    if (!/\.(mp3|wav|ogg|m4a|aac|webm)$/i.test(file.name)) {
+        showOnScreenNotification("সমর্থিত অডিও ফাইল নির্বাচন করুন!");
+        input.value = '';
+        return;
+    }
+    try {
+        initAudio();
+        const reader = new FileReader();
+        reader.onerror = () => {
+            showOnScreenNotification("টোন ফাইল পড়া যায়নি!");
+            input.value = '';
+        };
+        reader.onload = e => {
+            if (!audioCtx || !e.target.result) {
+                showOnScreenNotification("অডিও সিস্টেম প্রস্তুত নয়!");
+                input.value = '';
+                return;
+            }
+            audioCtx.decodeAudioData(e.target.result.slice(0), buffer => {
+                try {
+                    const toneObj = {name: file.name, arrayBuffer: e.target.result};
+                    customToneList.push(toneObj);
+                    customAudioBuffers.set(customToneList.length - 1, buffer);
+                    localStorage.setItem('farhad_custom_tones', JSON.stringify(customToneList));
+                    updateToneList();
+                    currentToneIndex = tones.length - 1;
+                    localStorage.setItem('farhad_tone_idx', currentToneIndex);
+                    refreshDisplayValues();
+                    showOnScreenNotification("টোন লোড সফল!");
+                    if (currentPage === 'sub' && pageIds[selectedMenuIndex] === 'tonebank') renderToneBankUI();
+                } catch (err) {
+                    showOnScreenNotification("টোন সেভ করা যায়নি!");
+                } finally {
+                    input.value = '';
+                }
+            }, () => {
+                showOnScreenNotification("ফাইলটি চালানো যায় না বা নষ্ট!");
+                input.value = '';
+            });
+        };
+        reader.readAsArrayBuffer(file);
+    } catch (err) {
+        input.value = '';
+        showOnScreenNotification("টোন লোড করা যায়নি!");
+    }
+}
+
+        function loadAndSaveStyleDirect(event) {
+    const input = event && event.target;
+    const file = input && input.files && input.files[0];
+    if (!file) return;
+    if (!/\.(mp3|wav|ogg|m4a|aac|webm|mid|midi)$/i.test(file.name)) {
+        showOnScreenNotification("সমর্থিত অডিও ফাইল নির্বাচন করুন!");
+        input.value = '';
+        return;
+    }
+    if (/\.(mid|midi)$/i.test(file.name)) {
+        showOnScreenNotification("MIDI ফাইলের জন্য MIDI প্লেব্যাক সাপোর্ট প্রয়োজন!");
+        input.value = '';
+        return;
+    }
+    try {
+        initAudio();
+        const reader = new FileReader();
+        reader.onerror = () => {
+            showOnScreenNotification("স্টাইল ফাইল পড়া যায়নি!");
+            input.value = '';
+        };
+        reader.onload = e => {
+            if (!audioCtx || !e.target.result) {
+                showOnScreenNotification("অডিও সিস্টেম প্রস্তুত নয়!");
+                input.value = '';
+                return;
+            }
+            audioCtx.decodeAudioData(e.target.result.slice(0), buffer => {
+                try {
+                    styleBank.push({
+                        id: Date.now(),
+                        name: file.name,
+                        audioBuffer: buffer,
+                        arrayBuffer: e.target.result,
+                        isPlaying: false
+                    });
+                    localStorage.setItem('farhad_style_bank', JSON.stringify(
+                        styleBank.map(s => ({id: s.id, name: s.name, arrayBuffer: s.arrayBuffer}))
+                    ));
+                    renderStyleBankUI();
+                    showOnScreenNotification("স্টাইল লোড ও সেভ সফল!");
+                } catch (err) {
+                    showOnScreenNotification("স্টাইল সেভ করা যায়নি!");
+                } finally {
+                    input.value = '';
+                }
+            }, () => {
+                showOnScreenNotification("ফাইলটি চালানো যায় না বা নষ্ট!");
+                input.value = '';
+            });
+        };
+        reader.readAsArrayBuffer(file);
+    } catch (err) {
+        input.value = '';
+        showOnScreenNotification("স্টাইল লোড করা যায়নি!");
+    }
+}
+
+        function renderToneBankUI() {
+            const container = document.getElementById('toneBankList');
+            const titleEl = document.getElementById('toneBankTitle');
+            updateToneList();
+            
+            if(titleEl) {
+                titleEl.innerText = `🎵 টোন ব্যাংক (মোট: ${tones.length})`;
+            }
+
+            if (tones.length === 0) { 
+                container.innerHTML = `<div style="font-size: 0.43rem; color: #888; text-align: center; margin-top: 10px;">কোনো টোন নেই</div>`; 
+                return; 
+            }
+            container.innerHTML = '';
+            tones.forEach((toneName, index) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = `style-bank-item ${index === currentToneIndex ? 'active-playing' : ''}`;
+                itemDiv.innerHTML = `<span class="style-name">${index + 1}. ${toneName}</span><div class="style-actions"><button class="style-btn style-on-btn ${index === currentToneIndex ? 'active' : ''}" onclick="selectToneByNumber(${index + 1})">সিলেক্ট</button></div>`;
+                container.appendChild(itemDiv);
+            });
+        }
+
+        function renderStyleBankUI() {
+            const container = document.getElementById('styleBankList');
+            const titleEl = document.getElementById('styleBankTitle');
+
+            if(titleEl) {
+                titleEl.innerText = `🎛️ স্টাইল ব্যাংক (মোট: ${styleBank.length})`;
+            }
+
+            if (styleBank.length === 0) { 
+                container.innerHTML = `<div style="font-size: 0.43rem; color: #888; text-align: center; margin-top: 10px;">কোনো লুপ নেই</div>`; 
+                return; 
+            }
+            container.innerHTML = '';
+            styleBank.forEach((style, index) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = `style-bank-item ${style.isPlaying ? 'active-playing' : ''}`;
+                itemDiv.innerHTML = `<span class="style-name">${index + 1}. ${style.name}</span><div class="style-actions"><button class="style-btn style-on-btn ${style.isPlaying ? 'active' : ''}" onclick="playStyleByIndex(${index})">${style.isPlaying ? 'চালু' : 'অন'}</button><button class="style-btn style-stop-btn" onclick="stopCurrentStyle()">স্টপ</button></div>`;
+                container.appendChild(itemDiv);
+            });
+        }
+
+        const baseFrequencies = [
+            130.81, 138.59, 146.83, 155.56, 164.81, 174.61, 185.00, 196.00, 207.65, 220.00, 233.08, 246.94,
+            261.63, 277.18, 293.66, 311.13, 329.63, 349.23, 369.99, 392.00, 415.30, 440.00, 466.16, 493.88,
+            523.25, 554.37, 587.33, 622.25, 659.25, 698.46, 739.99, 783.99, 830.61, 880.00, 932.33, 987.77,
+            1046.50, 1108.73, 1174.66, 1244.51, 1318.51, 1396.91
+        ];
+
+        const pianoContainer = document.getElementById('piano');
+        const activeNotes = new Map();
+        const pointerKeyMap = new Map();
+
+        function renderPiano() {
+            const whiteKeyCount = baseFrequencies.filter((_, i) => ![1, 3, 6, 8, 10].includes(i % 12)).length;
+            const fitWhiteKeyWidth = Math.max(8, (pianoContainer.clientWidth || window.innerWidth) / whiteKeyCount);
+            whiteKeyWidth = Math.max(
+                fitWhiteKeyWidth,
+                parseInt(localStorage.getItem("farhad_key_width"), 10) || fitWhiteKeyWidth
+            );
+            const keyGap = Math.max(0, Math.min(8, (whiteKeyWidth - fitWhiteKeyWidth) * 0.12));
+
+            pianoContainer.innerHTML = '';
+            let whiteKeyLeft = 0;
+            let whiteKeyNumber = 0;
+
+            baseFrequencies.forEach((freq, index) => {
+                const isSharp = [1, 3, 6, 8, 10].includes(index % 12);
+                const shiftedFreq = freq * Math.pow(2, semitoneShift / 12);
+                const key = document.createElement('div');
+                key.className = `key ${isSharp ? 'black-key' : 'white-key'}`;
+                key.dataset.freq = shiftedFreq;
+                key.dataset.id = index;
+
+                if (!isSharp) {
+                    whiteKeyNumber++;
+                    key.style.width = whiteKeyWidth + 'px';
+                    key.style.marginRight = whiteKeyNumber < whiteKeyCount ? keyGap + 'px' : '0px';
+                    whiteKeyLeft += whiteKeyWidth + (whiteKeyNumber < whiteKeyCount ? keyGap : 0);
+                } else {
+                    key.style.width = (whiteKeyWidth * 0.6) + 'px';
+                    key.style.left = (whiteKeyLeft - (whiteKeyWidth * 0.3)) + 'px';
+                }
+                pianoContainer.appendChild(key);
+            });
+        }
+
+        window.addEventListener('resize', renderPiano);
+
+        let currentPitchBendOffset = 0;
+        let modulationActive = false;
+        let numberInputBuffer = "";
+        let numberInputTimer = null;
+
+        function getPitchLoudnessCompensation(freq) {
+            const f = Math.max(20, Math.min(20000, Number(freq) || 440));
+            const f2 = f * f;
+            const numerator = 12194 * 12194 * f2 * f2;
+            const denominator =
+                (f2 + 20.6 * 20.6) *
+                Math.sqrt((f2 + 107.7 * 107.7) * (f2 + 737.9 * 737.9)) *
+                (f2 + 12194 * 12194);
+            const aWeightDb = 20 * Math.log10(numerator / denominator) + 2.0;
+            const correctionDb = Math.max(-3, Math.min(3, -aWeightDb));
+            return Math.pow(10, correctionDb / 20);
+        }
+
+        const toneAnalysisCache = new WeakMap();
+
+        function analyzeToneBuffer(buffer) {
+            if (toneAnalysisCache.has(buffer)) return toneAnalysisCache.get(buffer);
+
+            const sampleRate = buffer.sampleRate;
+            const channelCount = buffer.numberOfChannels;
+            const stride = Math.max(1, Math.floor(sampleRate / 22050));
+            const sr = sampleRate / stride;
+            const length = Math.ceil(buffer.length / stride);
+            const mono = new Float32Array(length);
+            let peak = 0;
+
+            for (let i = 0, j = 0; i < buffer.length; i += stride, j++) {
+                let value = 0;
+                for (let c = 0; c < channelCount; c++) {
+                    const channelSample = buffer.getChannelData(c)[i];
+                    value += channelSample / channelCount;
+                    peak = Math.max(peak, Math.abs(channelSample));
+                }
+                mono[j] = value;
+            }
+
+            const frameSize = Math.min(4096, mono.length);
+            const hop = Math.max(512, Math.floor(frameSize / 2));
+            let maxPower = 0;
+            let pitchStart = 0;
+            let activeRmsSum = 0;
+            let activeFrames = 0;
+
+            for (let start = 0; start + frameSize <= mono.length; start += hop) {
+                let sum = 0;
+                for (let i = start; i < start + frameSize; i++) sum += mono[i] * mono[i];
+                const power = sum / frameSize;
+                if (power > maxPower) {
+                    maxPower = power;
+                    pitchStart = start;
+                }
+            }
+
+            const maxRms = Math.sqrt(maxPower);
+            if (peak < 1e-6 || maxRms < 1e-6) {
+                const silent = { rootFreq: 261.63, levelGain: 1, rms: 0, confidence: 0 };
+                toneAnalysisCache.set(buffer, silent);
+                return silent;
+            }
+
+            for (let start = 0; start + frameSize <= mono.length; start += hop) {
+                let sum = 0;
+                for (let i = start; i < start + frameSize; i++) sum += mono[i] * mono[i];
+                const frameRms = Math.sqrt(sum / frameSize);
+                if (frameRms >= maxRms * 0.1) {
+                    activeRmsSum += frameRms;
+                    activeFrames++;
+                }
+            }
+
+            const rms = activeFrames ? activeRmsSum / activeFrames : maxRms;
+            const targetRms = 0.08;
+            const levelGain = Math.max(
+                0.01,
+                Math.min(
+                    8,
+                    targetRms / Math.max(rms, 1e-6),
+                    0.90 / (0.65 * Math.max(peak, 1e-6))
+                )
+            );
+
+            const frame = new Float64Array(frameSize);
+            let mean = 0;
+            for (let i = 0; i < frameSize; i++) {
+                frame[i] = mono[pitchStart + i];
+                mean += frame[i];
+            }
+            mean /= frameSize;
+
+            for (let i = 0; i < frameSize; i++) {
+                frame[i] = (frame[i] - mean) * (0.5 - 0.5 * Math.cos(2 * Math.PI * i / Math.max(1, frameSize - 1)));
+            }
+
+            const minLag = Math.max(2, Math.floor(sr / 2000));
+            const maxLag = Math.min(Math.floor(sr / 50), Math.floor(frameSize / 2));
+            const diff = new Float64Array(maxLag + 1);
+            const cmnd = new Float64Array(maxLag + 1);
+            cmnd.fill(1);
+            let cumulative = 0;
+
+            for (let lag = 1; lag <= maxLag; lag++) {
+                let d = 0;
+                for (let i = 0; i < frameSize - lag; i++) {
+                    const delta = frame[i] - frame[i + lag];
+                    d += delta * delta;
+                }
+                diff[lag] = d;
+                cumulative += d;
+                cmnd[lag] = cumulative > 1e-15 ? d * lag / cumulative : 1;
+            }
+
+            let chosen = 0;
+            for (let lag = minLag + 1; lag < maxLag; lag++) {
+                if (cmnd[lag] < 0.18 &&
+                    cmnd[lag] <= cmnd[lag - 1] &&
+                    cmnd[lag] <= cmnd[lag + 1]) {
+                    chosen = lag;
+                    while (chosen + 1 < maxLag && cmnd[chosen + 1] < cmnd[chosen]) chosen++;
+                    break;
+                }
+            }
+
+            if (!chosen) {
+                let best = Infinity;
+                for (let lag = minLag; lag <= maxLag; lag++) {
+                    if (cmnd[lag] < best) {
+                        best = cmnd[lag];
+                        chosen = lag;
+                    }
+                }
+            }
+
+            let refinedLag = chosen;
+            if (chosen > minLag && chosen < maxLag) {
+                const left = cmnd[chosen - 1];
+                const mid = cmnd[chosen];
+                const right = cmnd[chosen + 1];
+                const denom = left - 2 * mid + right;
+                if (Math.abs(denom) > 1e-12) {
+                    refinedLag += 0.5 * (left - right) / denom;
+                }
+            }
+
+            const confidence = chosen ? Math.max(0, Math.min(1, 1 - cmnd[chosen])) : 0;
+            let rootFreq;
+
+            if (chosen && confidence >= 0.75) {
+                rootFreq = sr / refinedLag;
+            } else {
+                // Fallback pitch estimate when YIN confidence is low.
+                let bestLag = 0;
+                let bestCorr = 0;
+
+                for (let lag = minLag; lag <= maxLag; lag++) {
+                    let xy = 0, xx = 0, yy = 0;
+                    for (let i = 0; i < frameSize - lag; i++) {
+                        const a = frame[i];
+                        const b = frame[i + lag];
+                        xy += a * b;
+                        xx += a * a;
+                        yy += b * b;
+                    }
+
+                    const corr = xx > 1e-12 && yy > 1e-12
+                        ? xy / Math.sqrt(xx * yy)
+                        : 0;
+
+                    if (corr > bestCorr) {
+                        bestCorr = corr;
+                        bestLag = lag;
+                    }
+                }
+
+                rootFreq = bestLag && bestCorr >= 0.55
+                    ? sr / bestLag
+                    : 261.63;
+            }
+
+            const result = { rootFreq, levelGain, rms, confidence };
+            toneAnalysisCache.set(buffer, result);
+            return result;
+        }
+
+        function loadBundledToneBuffer(index) {
+            if (bundledAudioBuffers.has(index)) return Promise.resolve(bundledAudioBuffers.get(index));
+            if (bundledAudioLoads.has(index)) return bundledAudioLoads.get(index);
+            const item = bundledToneList[index];
+            const promise = new Promise((resolve, reject) => {
+                const xhr = new XMLHttpRequest();
+                xhr.open('GET', item.file, true);
+                xhr.responseType = 'arraybuffer';
+                xhr.onload = () => {
+                    if (xhr.status !== 0 && (xhr.status < 200 || xhr.status >= 300)) {
+                        reject(new Error('Audio file HTTP ' + xhr.status));
+                        return;
+                    }
+                    audioCtx.decodeAudioData(xhr.response, buffer => {
+                        bundledAudioBuffers.set(index, buffer);
+                        resolve(buffer);
+                    }, reject);
+                };
+                xhr.onerror = () => reject(new Error('Audio file could not be loaded'));
+                xhr.send();
+            });
+            bundledAudioLoads.set(index, promise);
+            promise.catch(() => bundledAudioLoads.delete(index));
+            return promise;
+        }
+
+        function startNoteByElement(keyElement) {
+            initAudio();
+            resetSleepTimer();
+            const keyId = keyElement.dataset.id;
+            if (activeNotes.has(keyId)) return;
+            
+            let baseFreq = parseFloat(keyElement.dataset.freq);
+            let freq = baseFreq * Math.pow(2, currentPitchBendOffset / 12);
+
+            const now = audioCtx.currentTime;
+            const gainNode = audioCtx.createGain();
+            gainNode.gain.setValueAtTime(0.65, now);
+            gainNode.connect(masterGain);
+            if (delayNode && delTime > 0 && delMix > 0) gainNode.connect(delayNode);
+            if (convolverNode && revDepth > 0) gainNode.connect(convolverNode);
+
+            if (currentToneIndex >= baseTones.length) {
+                const toneOffset = currentToneIndex - baseTones.length;
+                if (toneOffset < bundledToneList.length) {
+                    const noteObj = { gainNode, baseFreq, pending: true };
+                    activeNotes.set(keyId, noteObj);
+                    keyElement.classList.add('active');
+                    loadBundledToneBuffer(toneOffset).then(buffer => {
+                        if (activeNotes.get(keyId) !== noteObj) return;
+                        const source = audioCtx.createBufferSource();
+                        source.buffer = buffer;
+                        const toneStats = analyzeToneBuffer(buffer);
+                        noteObj.rootFreq = toneStats.rootFreq;
+                        gainNode.gain.setValueAtTime(0.65 * toneStats.levelGain * getPitchLoudnessCompensation(freq), audioCtx.currentTime);
+                        source.playbackRate.setValueAtTime(freq / toneStats.rootFreq, audioCtx.currentTime);
+                        source.connect(gainNode);
+                        noteObj.source = source;
+                        noteObj.pending = false;
+                        source.start();
+                    }).catch(() => {
+                        if (activeNotes.get(keyId) === noteObj) {
+                            activeNotes.delete(keyId);
+                            keyElement.classList.remove('active');
+                            showOnScreenNotification('টোন ফাইল লোড হয়নি!');
+                        }
+                    });
+                    return;
+                }
+
+                const customIdx = toneOffset - bundledToneList.length;
+                const toneItem = customToneList[customIdx];
+                if (toneItem) {
+                    if (!customAudioBuffers.has(customIdx) && toneItem.arrayBuffer) {
+                        audioCtx.decodeAudioData(toneItem.arrayBuffer, buffer => {
+                            customAudioBuffers.set(customIdx, buffer);
+                        });
+                    }
+                    const buf = customAudioBuffers.get(customIdx);
+                    if (buf) {
+                        const source = audioCtx.createBufferSource();
+                        source.buffer = buf;
+                        const toneStats = analyzeToneBuffer(buf);
+                        source.playbackRate.setValueAtTime(freq / toneStats.rootFreq, now);
+                        gainNode.gain.setValueAtTime(0.65 * toneStats.levelGain * getPitchLoudnessCompensation(freq), now);
+                        source.connect(gainNode);
+                        source.start(now);
+                        activeNotes.set(keyId, { source, gainNode, baseFreq, rootFreq: analyzeToneBuffer(buf).rootFreq });
+                        keyElement.classList.add('active');
+                        return;
+                    }
+                }
+            }
+            const osc = audioCtx.createOscillator();
+            osc.type = currentToneIndex === 1 ? 'sawtooth' : (currentToneIndex === 2 ? 'square' : 'triangle');
+            osc.frequency.setValueAtTime(freq, now);
+
+            let modLFO = null;
+            if (modulationActive) {
+                modLFO = audioCtx.createOscillator();
+                let modGain = audioCtx.createGain();
+                modLFO.frequency.value = 5;
+                modGain.gain.value = freq * 0.03;
+                modLFO.connect(modGain);
+                modGain.connect(osc.frequency);
+                modLFO.start(now);
+            }
+
+            osc.connect(gainNode);
+            osc.start(now);
+            activeNotes.set(keyId, { osc, modLFO, gainNode, baseFreq });
+            keyElement.classList.add('active');
+        }
+
+        function stopNoteByKeyId(keyId) {
+            if (activeNotes.has(keyId)) {
+                const noteObj = activeNotes.get(keyId);
+                const now = audioCtx.currentTime;
+                noteObj.gainNode.gain.cancelScheduledValues(now);
+                noteObj.gainNode.gain.setValueAtTime(noteObj.gainNode.gain.value, now);
+                noteObj.gainNode.gain.exponentialRampToValueAtTime(0.0001, now + releaseTime);
+                if (noteObj.osc) noteObj.osc.stop(now + releaseTime);
+                if (noteObj.modLFO) noteObj.modLFO.stop(now + releaseTime);
+                if (noteObj.source) noteObj.source.stop(now + releaseTime);
+                activeNotes.delete(keyId);
+            }
+            const keyElement = pianoContainer.querySelector(`[data-id="${keyId}"]`);
+            if (keyElement) keyElement.classList.remove('active');
+        }
+
+        const pcKeyToNoteMap = {
+    'KeyQ': 0,
+    'KeyW': 2,
+    'KeyE': 4,
+    'KeyR': 5,
+    'KeyT': 7,
+    'KeyY': 9,
+    'KeyU': 11,
+    'KeyI': 12,
+    'KeyO': 14,
+    'KeyP': 16,
+    'KeyA': 17,
+    'KeyS': 19,
+    'KeyD': 21,
+    'KeyF': 23,
+    'KeyG': 24,
+    'KeyH': 26,
+    'KeyJ': 28,
+    'KeyK': 29,
+    'KeyL': 31,
+    'KeyZ': 33,
+    'KeyX': 35,
+    'KeyC': 36,
+    'KeyV': 38,
+    'KeyB': 40,
+    'KeyN': 41,
+    'BracketLeft': 17,
+    'BracketRight': 19,
+    'Backslash': 21,
+    'Semicolon': 33,
+    'Quote': 35,
+    'Backquote': 34,
+    'Comma': 37,
+    'Period': 39,
+    
+    'Digit2': 1,
+    'Digit3': 3,
+    'Digit5': 6,
+    'Digit6': 8,
+    'Digit7': 10,
+    'Digit9': 13,
+    'Digit0': 15,
+    'Equal': 18,};
+const pressedPcKeys = new Set();
+
+        window.addEventListener('keydown', (e) => {
+            if (e.repeat) return;
+
+            if (/^Numpad[0-9]$/.test(e.code)) {
+                if (currentPage === 'home') {
+                    numberInputBuffer += e.code.slice(-1);
+                    showOnScreenNotification(`টোন নাম্বার: ${numberInputBuffer}`);
+                    if (numberInputTimer) clearTimeout(numberInputTimer);
+                    numberInputTimer = setTimeout(() => {
+                        const toneNum = parseInt(numberInputBuffer, 10);
+                        if (!isNaN(toneNum) && toneNum > 0) {
+                            selectToneByNumber(toneNum);
+                        }
+                        numberInputBuffer = "";
+                    }, 800);
+                }
+                return;
+            }
+
+            const keyLower = e.code;
+            
+            if (e.key === 'Control' && currentPitchBendOffset !== -1) {
+                currentPitchBendOffset = -1;
+                updateActiveNotesPitch();
+                showOnScreenNotification("পিচ বেন্ড: DOWN (-1)");
+                return;
+            }
+            if (e.key === 'Alt' && currentPitchBendOffset !== 1) {
+                currentPitchBendOffset = 1;
+                updateActiveNotesPitch();
+                showOnScreenNotification("পিচ বেন্ড: UP (+1)");
+                return;
+            }
+            if (e.key === 'Shift') {
+                modulationActive = true;
+                showOnScreenNotification("মডুলেশন (Shift): ON");
+                return;
+            }
+
+            if (pcKeyToNoteMap.hasOwnProperty(keyLower) && !pressedPcKeys.has(keyLower)) {
+                pressedPcKeys.add(keyLower);
+                let targetId = pcKeyToNoteMap[keyLower];
+                const keyEl = pianoContainer.querySelector(`[data-id="${targetId}"]`);
+                if (keyEl) startNoteByElement(keyEl);
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            if (e.key === 'Control' || e.key === 'Alt') {
+                currentPitchBendOffset = 0;
+                updateActiveNotesPitch();
+                showOnScreenNotification("পিচ বেন্ড: নরমাল");
+                return;
+            }
+            if (e.key === 'Shift') {
+                modulationActive = false;
+                showOnScreenNotification("মডুলেশন: OFF");
+                return;
+            }
+
+            const keyLower = e.code;
+            if (pcKeyToNoteMap.hasOwnProperty(keyLower)) {
+                pressedPcKeys.delete(keyLower);
+                let targetId = pcKeyToNoteMap[keyLower];
+                stopNoteByKeyId(String(targetId));
+            }
+        });
+
+        function releasePcKeyboardNotes() {
+            pressedPcKeys.forEach(keyLower => {
+                const targetId = pcKeyToNoteMap[keyLower];
+                if (targetId !== undefined) stopNoteByKeyId(targetId);
+            });
+            pressedPcKeys.clear();
+        }
+
+        window.addEventListener('blur', releasePcKeyboardNotes);
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) releasePcKeyboardNotes();
+        });
+
+        function updateActiveNotesPitch() {
+            if (!audioCtx) return;
+            const now = audioCtx.currentTime;
+            activeNotes.forEach((noteObj, keyId) => {
+                const keyEl = pianoContainer.querySelector(`[data-id="${keyId}"]`);
+                if (keyEl) {
+                    let baseFreq = parseFloat(keyEl.dataset.freq);
+                    let newFreq = baseFreq * Math.pow(2, currentPitchBendOffset / 12);
+                    if (noteObj.osc) {
+                        noteObj.osc.frequency.setValueAtTime(newFreq, now);
+                    }
+                    if (noteObj.source) {
+                        noteObj.source.playbackRate.setValueAtTime(newFreq / (noteObj.rootFreq || 261.63), now);
+                    }
+                }
+            });
+        }
+
+        function handlePointerMove(e) {
+            e.preventDefault();
+            initAudio();
+            const touches = e.touches || [e];
+            const currentPointerKeys = new Map();
+            for (let i = 0; i < touches.length; i++) {
+                const touch = touches[i];
+                const pointerId = touch.identifier !== undefined ? touch.identifier : 'mouse';
+                const element = document.elementFromPoint(touch.clientX, touch.clientY);
+                if (element && element.classList.contains('key')) {
+                    const keyId = element.dataset.id;
+                    currentPointerKeys.set(pointerId, keyId);
+                    if (!activeNotes.has(keyId)) startNoteByElement(element);
+                }
+            }
+            pointerKeyMap.forEach((oldKeyId, pointerId) => {
+                if (!currentPointerKeys.has(pointerId) || currentPointerKeys.get(pointerId) !== oldKeyId) {
+                    let stillUsed = false;
+                    currentPointerKeys.forEach(kId => { if (kId === oldKeyId) stillUsed = true; });
+                    if (!stillUsed) stopNoteByKeyId(oldKeyId);
+                }
+            });
+            pointerKeyMap.clear();
+            currentPointerKeys.forEach((kId, pId) => pointerKeyMap.set(pId, kId));
+        }
+
+        function releaseAllNotes() {
+            pointerKeyMap.clear();
+            activeNotes.forEach((v, kId) => stopNoteByKeyId(kId));
+        }
+
+        // Piano keys: play notes only; never scroll by dragging keys.
+        pianoContainer.addEventListener('touchstart', e => {
+            handlePointerMove(e);
+        }, { passive: false });
+
+        pianoContainer.addEventListener('touchmove', e => {
+            handlePointerMove(e);
+        }, { passive: false });
+
+        pianoContainer.addEventListener('touchend', e => {
+            handlePointerMove(e);
+        }, { passive: false });
+
+        pianoContainer.addEventListener('touchcancel', e => {
+            handlePointerMove(e);
+        }, { passive: false });
+
+        pianoContainer.addEventListener('mousedown', e => {
+            handlePointerMove(e);
+        });
+
+        pianoContainer.addEventListener('mousemove', e => {
+            if (e.buttons === 1) handlePointerMove(e);
+        });
+
+        window.addEventListener('mouseup', releaseAllNotes);
+
+        // LCD is the only horizontal keyboard-scroll zone.
+        const lcdDisplay = document.getElementById('lcdDisplay');
+        let lcdTouchDrag = null;
+        let lcdMouseDrag = null;
+        let suppressLcdClick = false;
+
+        lcdDisplay.addEventListener('touchstart', e => {
+            if (e.touches.length === 1) {
+                const t = e.touches[0];
+                lcdTouchDrag = {
+                    x: t.clientX,
+                    y: t.clientY,
+                    scroll: pianoContainer.scrollLeft,
+                    dragging: false
+                };
+            } else {
+                lcdTouchDrag = null;
+            }
+        }, { passive: true });
+
+        lcdDisplay.addEventListener('touchmove', e => {
+            if (!lcdTouchDrag || e.touches.length !== 1) return;
+
+            const t = e.touches[0];
+            const dx = t.clientX - lcdTouchDrag.x;
+            const dy = t.clientY - lcdTouchDrag.y;
+
+            if (!lcdTouchDrag.dragging &&
+                Math.abs(dx) > 10 &&
+                Math.abs(dx) > Math.abs(dy) * 1.2) {
+                lcdTouchDrag.dragging = true;
+            }
+
+            if (lcdTouchDrag.dragging) {
+                e.preventDefault();
+                pianoContainer.scrollLeft = lcdTouchDrag.scroll - dx;
+                suppressLcdClick = true;
+            }
+        }, { passive: false });
+
+        lcdDisplay.addEventListener('touchend', () => {
+            lcdTouchDrag = null;
+        }, { passive: true });
+
+        lcdDisplay.addEventListener('touchcancel', () => {
+            lcdTouchDrag = null;
+        }, { passive: true });
+
+        lcdDisplay.addEventListener('mousedown', e => {
+            lcdMouseDrag = {
+                x: e.clientX,
+                y: e.clientY,
+                scroll: pianoContainer.scrollLeft,
+                dragging: false
+            };
+        });
+
+        window.addEventListener('mousemove', e => {
+            if (!lcdMouseDrag || e.buttons !== 1) return;
+
+            const dx = e.clientX - lcdMouseDrag.x;
+            const dy = e.clientY - lcdMouseDrag.y;
+
+            if (!lcdMouseDrag.dragging &&
+                Math.abs(dx) > 10 &&
+                Math.abs(dx) > Math.abs(dy) * 1.2) {
+                lcdMouseDrag.dragging = true;
+            }
+
+            if (lcdMouseDrag.dragging) {
+                e.preventDefault();
+                pianoContainer.scrollLeft = lcdMouseDrag.scroll - dx;
+                suppressLcdClick = true;
+            }
+        });
+
+        window.addEventListener('mouseup', () => {
+            lcdMouseDrag = null;
+        });
+
+        lcdDisplay.addEventListener('click', e => {
+            if (suppressLcdClick) {
+                e.preventDefault();
+                e.stopPropagation();
+                suppressLcdClick = false;
+            }
+        }, true);
+
+        // Enter browser fullscreen on the user's first touch.
+        function enableKeyboardFullscreen() {
+            const root = document.documentElement;
+
+            if (document.fullscreenElement) {
+                document.removeEventListener('pointerdown', enableKeyboardFullscreen);
+                return;
+            }
+
+            if (root.requestFullscreen) {
+                root.requestFullscreen({ navigationUI: 'hide' })
+                    .then(() => {
+                        document.removeEventListener('pointerdown', enableKeyboardFullscreen);
+                    })
+                    .catch(() => {});
+            }
+        }
+
+        document.addEventListener('pointerdown', enableKeyboardFullscreen);
+
+        renderPiano();
+    </script>
+</body>
+</html>
+;;
