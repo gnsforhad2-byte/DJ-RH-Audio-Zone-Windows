@@ -1,0 +1,46 @@
+{
+  "name": "dj-rh-audio-zone",
+  "version": "1.0.0",
+  "description": "DJ RH Audio Zone Windows Desktop App",
+  "main": "main.js",
+  "author": "DJ RH Audio Zone",
+  "license": "UNLICENSED",
+  "scripts": {
+    "start": "electron .",
+    "build:win": "electron-builder --win nsis --x64"
+  },
+  "devDependencies": {
+    "electron": "45.2.3",
+    "electron-builder": "26.18.1"
+  },
+  "build": {
+    "appId": "com.djrh.audiozone",
+    "productName": "DJ RH Audio Zone",
+    "asar": false,
+    "files": [
+      "main.js",
+      "index.html",
+      "tones.json",
+      "firebase/**/*",
+      "tones/**/*",
+      "style_loops/**/*"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
+      "artifactName": "DJ-RH-Audio-Zone-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  }
+}
