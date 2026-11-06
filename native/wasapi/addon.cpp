@@ -9,6 +9,8 @@
 #include <cstdint>
 #include <atomic>
 #include <algorithm>
+#include <cmath>
+#include <limits>
 static std::unique_ptr<RtAudio> g_audio;
 static unsigned int g_channels = 2;
 static unsigned int g_sampleRate = 48000;
@@ -48,24 +50,29 @@ static void SetString(napi_env env, napi_value object,
 }
 
 static bool ReadUint(napi_env env, napi_value object,
-                     const char* name, unsigned int& value) {
+                     const char* name, unsigned int& value,
+                     bool required) {
     bool exists = false;
-    if (napi_has_named_property(env, object, name, &exists) != napi_ok ||
-        !exists) return false;
+    if (napi_has_named_property(env, object, name, &exists) != napi_ok)
+        return false;
+    if (!exists) return !required;
 
     napi_value v;
     if (napi_get_named_property(env, object, name, &v) != napi_ok)
         return false;
 
     napi_valuetype type;
-    napi_typeof(env, v, &type);
-    if (type != napi_number) return false;
-
-    uint32_t result = 0;
-    if (napi_get_value_uint32(env, v, &result) != napi_ok)
+    if (napi_typeof(env, v, &type) != napi_ok || type != napi_number)
         return false;
 
-    value = result;
+    double number = 0.0;
+    if (napi_get_value_double(env, v, &number) != napi_ok ||
+        !std::isfinite(number) || number < 0.0 ||
+        number > static_cast<double>(std::numeric_limits<unsigned int>::max()) ||
+        std::floor(number) != number)
+        return false;
+
+    value = static_cast<unsigned int>(number);
     return true;
 }
 
@@ -178,8 +185,10 @@ static napi_value WriteAudio(napi_env env, napi_callback_info info) {
 
 static napi_value GetDevices(napi_env env, napi_callback_info) {
     try {
-        RtAudio audio(RtAudio::WINDOWS_WASAPI);
-        std::vector<unsigned int> ids = audio.getDeviceIds();
+        // Keep enumeration and opening on the same RtAudio instance.
+        if (!g_audio)
+            g_audio = std::make_unique<RtAudio>(RtAudio::WINDOWS_WASAPI);
+        std::vector<unsigned int> ids = g_audio->getDeviceIds();
 
         napi_value array;
         napi_create_array(env, &array);
@@ -187,7 +196,7 @@ static napi_value GetDevices(napi_env env, napi_callback_info) {
         uint32_t index = 0;
 
         for (unsigned int id : ids) {
-            RtAudio::DeviceInfo info = audio.getDeviceInfo(id);
+            RtAudio::DeviceInfo info = g_audio->getDeviceInfo(id);
 
             if (!info.outputChannels) continue;
 
@@ -233,11 +242,14 @@ static napi_value OpenDevice(napi_env env, napi_callback_info info) {
     unsigned int sampleRate = 48000;
     unsigned int channels = 2;
 
-    if (!ReadUint(env, argv[0], "deviceId", deviceId))
-        return ThrowError(env, "A valid deviceId is required.");
+    if (!ReadUint(env, argv[0], "deviceId", deviceId, true))
+        return ThrowError(env, "deviceId must be a non-negative integer.");
 
-    ReadUint(env, argv[0], "sampleRate", sampleRate);
-    ReadUint(env, argv[0], "channels", channels);
+    if (!ReadUint(env, argv[0], "sampleRate", sampleRate, false))
+        return ThrowError(env, "sampleRate must be a non-negative integer.");
+
+    if (!ReadUint(env, argv[0], "channels", channels, false))
+        return ThrowError(env, "channels must be a non-negative integer.");
 
     if (sampleRate < 8000 || sampleRate > 192000)
         return ThrowError(env, "Unsupported sample rate value.");
@@ -246,20 +258,20 @@ static napi_value OpenDevice(napi_env env, napi_callback_info info) {
         return ThrowError(env, "Invalid output channel count.");
 
     try {
-        if (g_audio) {
-            if (g_audio->isStreamRunning())
-                g_audio->stopStream();
-            if (g_audio->isStreamOpen())
-                g_audio->closeStream();
-            g_audio.reset();
-        }
+        if (!g_audio)
+            g_audio = std::make_unique<RtAudio>(RtAudio::WINDOWS_WASAPI);
 
-        g_audio = std::make_unique<RtAudio>(
-            RtAudio::WINDOWS_WASAPI
-        );
+        if (g_audio->isStreamRunning())
+            g_audio->stopStream();
+        if (g_audio->isStreamOpen())
+            g_audio->closeStream();
 
-        RtAudio::DeviceInfo deviceInfo =
-            g_audio->getDeviceInfo(deviceId);
+        const std::vector<unsigned int> currentIds = g_audio->getDeviceIds();
+        if (std::find(currentIds.begin(), currentIds.end(), deviceId) ==
+            currentIds.end())
+            return ThrowError(env, "Selected WASAPI device is no longer available.");
+
+        RtAudio::DeviceInfo deviceInfo = g_audio->getDeviceInfo(deviceId);
 
         if (!deviceInfo.outputChannels)
             return ThrowError(env, "Selected device has no output channels.");
@@ -298,15 +310,14 @@ RtAudio::StreamParameters output;
         );
 
         if (result != RTAUDIO_NO_ERROR || !g_audio->isStreamOpen()) {
-            g_audio.reset();
+            if (g_audio->isStreamOpen()) g_audio->closeStream();
             return ThrowError(env, "WASAPI stream could not be opened.");
         }
 
         result = g_audio->startStream();
 
         if (result != RTAUDIO_NO_ERROR || !g_audio->isStreamRunning()) {
-            g_audio->closeStream();
-            g_audio.reset();
+            if (g_audio->isStreamOpen()) g_audio->closeStream();
             return ThrowError(env, "WASAPI stream could not be started.");
         }
 
@@ -326,10 +337,20 @@ RtAudio::StreamParameters output;
         return response;
 
     } catch (const std::exception& e) {
-        g_audio.reset();
+        if (g_audio) {
+            try {
+                if (g_audio->isStreamRunning()) g_audio->stopStream();
+                if (g_audio->isStreamOpen()) g_audio->closeStream();
+            } catch (...) {}
+        }
         return ThrowError(env, e.what());
     } catch (...) {
-        g_audio.reset();
+        if (g_audio) {
+            try {
+                if (g_audio->isStreamRunning()) g_audio->stopStream();
+                if (g_audio->isStreamOpen()) g_audio->closeStream();
+            } catch (...) {}
+        }
         return ThrowError(env, "WASAPI device opening failed.");
     }
 }
@@ -343,7 +364,6 @@ static napi_value CloseDevice(napi_env env, napi_callback_info) {
             if (g_audio->isStreamOpen())
                 g_audio->closeStream();
 
-            g_audio.reset();
         }
 
         napi_value result;
@@ -351,7 +371,6 @@ static napi_value CloseDevice(napi_env env, napi_callback_info) {
         return result;
 
     } catch (...) {
-        g_audio.reset();
         return ThrowError(env, "WASAPI stream closing failed.");
     }
 }
