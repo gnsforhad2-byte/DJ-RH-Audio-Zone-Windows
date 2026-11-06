@@ -22,6 +22,8 @@
     "asar": false,
     "files": [
       "main.js",
+      "audio-worklet.js",
+      "preload.js",
       "index.html",
       "tones.json",
       "firebase/**/*",
@@ -42,12 +44,15 @@
           ]
         }
       ],
-      "artifactName": "DJ-RH-Audio-Zone-Setup-${version}.${ext}"
+      "artifactName": "DJ-RH-Audio-Zone-Setup-${version}.${ext}",
+      "icon": "assets/app-icon.ico"
     },
     "nsis": {
       "oneClick": false,
       "perMachine": false,
-      "allowToChangeInstallationDirectory": true
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "assets/app-icon.ico",
+      "uninstallerIcon": "assets/app-icon.ico"
     }
   }
 }

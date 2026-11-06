@@ -1,4 +1,4 @@
-const { app, BrowserWindow, dialog } = require('electron');
+const { app, BrowserWindow, dialog, ipcMain } = require('electron');
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
@@ -23,6 +23,60 @@ const mimeTypes = {
 
 let mainWindow;
 let localServer;
+let wasapiAddon = null;
+
+try {
+  wasapiAddon = require(path.join(__dirname, 'build', 'Release', 'wasapi.node'));
+} catch (error) {
+  console.warn('WASAPI native module unavailable:', error.message);
+}
+
+ipcMain.handle('wasapi:get-devices', () => {
+  if (!wasapiAddon) return [];
+  return wasapiAddon.getDevices();
+});
+
+ipcMain.handle('wasapi:open', (_event, options = {}) => {
+  if (!wasapiAddon) throw new Error('WASAPI native module পাওয়া যায়নি।');
+  const deviceId = Number(options.deviceId);
+  const sampleRate = Number(options.sampleRate);
+  const channels = Number(options.channels);
+  if (!Number.isInteger(deviceId) || !Number.isInteger(sampleRate) ||
+      !Number.isInteger(channels)) {
+    throw new Error('অডিও ডিভাইসের সেটিংস সঠিক নয়।');
+  }
+  wasapiAddon.open({ deviceId, sampleRate, channels });
+  return wasapiAddon.getStatus();
+});
+
+ipcMain.handle('wasapi:close', () => {
+  if (wasapiAddon) wasapiAddon.close();
+  return true;
+});
+
+ipcMain.handle('wasapi:status', () => {
+  return wasapiAddon ? wasapiAddon.getStatus() : {
+    available: false, opened: false, running: false
+  };
+});
+
+ipcMain.on('wasapi:write', (_event, samples) => {
+  if (!wasapiAddon || !wasapiAddon.getStatus().running) return;
+  if (!(samples instanceof Float32Array)) return;
+  try {
+    wasapiAddon.write(samples);
+  } catch (error) {
+    console.error('WASAPI audio write failed:', error);
+  }
+});
+
+app.on('before-quit', () => {
+  try {
+    if (wasapiAddon) wasapiAddon.close();
+  } catch (error) {
+    console.error('WASAPI close failed:', error);
+  }
+});
 
 function startLocalServer() {
   localServer = http.createServer((req, res) => {
@@ -89,6 +143,7 @@ async function createWindow() {
     show: true,
     autoHideMenuBar: true,
     webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: false,
       contextIsolation: true,
       sandbox: true
