@@ -118,7 +118,7 @@ static int listDevices() {
                 "{\"id\":%u,\"name\":\"%s\",\"outputChannels\":%u,"
                 "\"defaultSampleRate\":%u,\"sampleRates\":[",
                 id, jsonEscape(info.name).c_str(),
-                info.outputChannels, info.defaultSampleRate
+                info.outputChannels, info.preferredSampleRate
             );
 
             for (size_t i = 0; i < info.sampleRates.size(); ++i) {
