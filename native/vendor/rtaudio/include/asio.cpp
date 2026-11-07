@@ -30,6 +30,7 @@ long main()
 #elif WINDOWS
 
 #include "windows.h"
+#include <objbase.h>
 #include "iasiodrv.h"
 #include "asiodrivers.h"
 
