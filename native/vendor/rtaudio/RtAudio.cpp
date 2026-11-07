@@ -53,6 +53,7 @@
 
 #if defined(_WIN32)
 #include <windows.h>
+#include <objbase.h>
 #endif
 
 // Static variable definitions.
