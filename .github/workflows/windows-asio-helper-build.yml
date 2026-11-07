@@ -1,0 +1,42 @@
+name: Windows ASIO Helper Build
+
+on:
+  push:
+    branches:
+      - feature/asio-isolated-backend
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm install --ignore-scripts
+        shell: cmd
+
+      - name: Compile native targets
+        run: npx --yes node-gyp@11 rebuild --release
+        shell: cmd
+
+      - name: Verify ASIO executable
+        run: if not exist build\Release\asio-helper.exe exit /b 1
+        shell: cmd
+
+      - name: Upload ASIO helper
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-asio-helper
+          path: build/Release/asio-helper.exe
+          if-no-files-found: error
