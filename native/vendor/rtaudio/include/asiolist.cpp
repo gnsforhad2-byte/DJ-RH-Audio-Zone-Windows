@@ -1,4 +1,5 @@
 #include <windows.h>
+#include <objbase.h>
 #include "iasiodrv.h"
 #include "asiolist.h"
 
