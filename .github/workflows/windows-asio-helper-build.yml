@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: windows-2022
 
     steps:
       - name: Checkout
@@ -27,7 +27,7 @@ jobs:
         shell: cmd
 
       - name: Compile native targets
-        run: npx --yes node-gyp@11 rebuild --release
+        run: npx --yes node-gyp@11 rebuild --release --msvs_version=2022
         shell: cmd
 
       - name: Verify ASIO executable
