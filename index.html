@@ -833,7 +833,7 @@
                             <div id="audioDriverDevice" style="font-size:0.72rem; color:#fff; text-align:center; overflow-wrap:anywhere;">ডিভাইস নির্বাচন করুন</div>
                             <div id="audioDriverFormat" style="font-size:0.48rem; color:#aaa; text-align:center;"></div>
                             <small style="font-size:0.42rem; color:#00ffcc; text-align:center;">[-] / [+] ডিভাইস নির্বাচন • OK সংযোগ / বিচ্ছিন্ন</small>
-                            <small style="font-size:0.38rem; color:#aaa; text-align:center;">Windows WASAPI output</small>
+                            <small style="font-size:0.38rem; color:#aaa; text-align:center;">Windows WASAPI / ASIO output</small>
                         </div>
                     </div>
 
@@ -1886,6 +1886,7 @@
         let audioDriverDevices = [];
         let selectedAudioDriverIndex = 0;
         let activeAudioDriverId = null;
+        let activeAudioDriverBackend = null;
         let audioDriverWorkletNode = null;
         let audioDriverConnected = false;
         let audioDriverBusy = false;
@@ -1991,6 +1992,7 @@
         }
 
 
+
         function updateAudioDriverUI(message) {
             const status = document.getElementById('audioDriverStatus');
             const device = document.getElementById('audioDriverDevice');
@@ -1999,36 +2001,71 @@
 
             if (audioDriverConnected) {
                 const active = audioDriverDevices.find(d => d.id === activeAudioDriverId);
-                status.textContent = '● CONNECTED — WASAPI';
+                const backend = activeAudioDriverBackend || active?.backend || 'WASAPI';
+                status.textContent = `● CONNECTED — ${backend}`;
                 status.style.color = '#4ade80';
                 device.textContent = active ? active.name : 'সক্রিয় অডিও ডিভাইস';
-                format.textContent = audioCtx ? `${audioCtx.sampleRate} Hz • WASAPI output` : '';
+                format.textContent = audioCtx
+                    ? `${audioCtx.sampleRate} Hz • ${backend} output`
+                    : `${backend} output`;
                 return;
             }
 
             status.textContent = message || (audioDriverDevices.length
-                ? 'ডিভাইস নির্বাচন করুন' : 'কোনো WASAPI output পাওয়া যায়নি');
+                ? 'ডিভাইস নির্বাচন করুন'
+                : 'কোনো WASAPI / ASIO output পাওয়া যায়নি');
             status.style.color = message ? '#fbbf24' : '#00ffcc';
 
             const selected = audioDriverDevices[selectedAudioDriverIndex];
-            device.textContent = selected ? selected.name : 'WASAPI ডিভাইস অনুপলব্ধ';
+            device.textContent = selected
+                ? `[${selected.backend}] ${selected.name}`
+                : 'কোনো output ডিভাইস পাওয়া যায়নি';
             format.textContent = selected
-                ? `Output channels: ${selected.outputChannels} • ID: ${selected.id}`
-                : 'Windows-এ অ্যাপ চালিয়ে WASAPI ডিভাইস পরীক্ষা করুন';
+                ? `Output channels: ${selected.outputChannels} • ID: ${selected.nativeId}`
+                : 'Windows-এ অ্যাপ চালিয়ে audio output পরীক্ষা করুন';
         }
 
         async function renderAudioDriverUI() {
             if (!window.audioDriver) {
                 audioDriverDevices = [];
-                updateAudioDriverUI('এই পরিবেশে Native WASAPI bridge নেই');
+                updateAudioDriverUI('Native audio bridge নেই');
                 return;
             }
+
             try {
                 const previousId = audioDriverDevices[selectedAudioDriverIndex]?.id;
-                const devices = await window.audioDriver.getDevices();
-                audioDriverDevices = Array.isArray(devices)
-                    ? devices.filter(d => Number(d.outputChannels) > 0)
+                const results = await Promise.allSettled([
+                    window.audioDriver.getDevices(),
+                    window.audioDriver.getAsioDevices()
+                ]);
+
+                const wasapi = results[0].status === 'fulfilled' &&
+                    Array.isArray(results[0].value)
+                    ? results[0].value
                     : [];
+
+                const asioResult = results[1].status === 'fulfilled'
+                    ? results[1].value
+                    : { devices: [], error: results[1].reason?.message };
+
+                const asio = Array.isArray(asioResult?.devices)
+                    ? asioResult.devices
+                    : [];
+
+                audioDriverDevices = [
+                    ...wasapi.filter(d => Number(d.outputChannels) > 0).map(d => ({
+                        ...d,
+                        backend: 'WASAPI',
+                        nativeId: d.id,
+                        id: `WASAPI:${d.id}`
+                    })),
+                    ...asio.filter(d => Number(d.outputChannels) > 0).map(d => ({
+                        ...d,
+                        backend: 'ASIO',
+                        nativeId: d.id,
+                        id: `ASIO:${d.id}`
+                    }))
+                ];
 
                 if (previousId !== undefined) {
                     const index = audioDriverDevices.findIndex(d => d.id === previousId);
@@ -2037,7 +2074,12 @@
                 if (selectedAudioDriverIndex >= audioDriverDevices.length) {
                     selectedAudioDriverIndex = 0;
                 }
-                updateAudioDriverUI();
+
+                updateAudioDriverUI(
+                    asioResult?.error && !audioDriverDevices.length
+                        ? `ASIO: ${asioResult.error}`
+                        : ''
+                );
             } catch (error) {
                 audioDriverDevices = [];
                 updateAudioDriverUI('ডিভাইস তালিকা পাওয়া যায়নি: ' + error.message);
@@ -2047,7 +2089,8 @@
         function adjustAudioDriverSelection(direction) {
             if (audioDriverConnected || !audioDriverDevices.length) return;
             selectedAudioDriverIndex =
-                (selectedAudioDriverIndex + direction + audioDriverDevices.length) % audioDriverDevices.length;
+                (selectedAudioDriverIndex + direction + audioDriverDevices.length) %
+                audioDriverDevices.length;
             updateAudioDriverUI();
         }
 
@@ -2056,16 +2099,19 @@
 
             const selected = audioDriverDevices[selectedAudioDriverIndex];
             if (!selected) {
-                updateAudioDriverUI('প্রথমে একটি WASAPI output ডিভাইস নির্বাচন করুন');
+                updateAudioDriverUI('প্রথমে একটি output ডিভাইস নির্বাচন করুন');
                 return;
             }
             if (!window.audioDriver || typeof AudioWorkletNode === 'undefined') {
-                updateAudioDriverUI('Native WASAPI / AudioWorklet সুবিধা পাওয়া যায়নি');
+                updateAudioDriverUI('Native audio / AudioWorklet সুবিধা পাওয়া যায়নি');
                 return;
             }
 
+            const backend = selected.backend || 'WASAPI';
+            const isAsio = backend === 'ASIO';
             audioDriverBusy = true;
-            updateAudioDriverUI('WASAPI সংযোগ হচ্ছে...');
+            updateAudioDriverUI(`${backend} সংযোগ হচ্ছে...`);
+
             let opened = false;
             let node = null;
             let graphRouted = false;
@@ -2082,11 +2128,17 @@
 
                 await audioCtx.audioWorklet.addModule('audio-worklet.js');
 
-                const nativeStatus = await window.audioDriver.open({
-                    deviceId: selected.id,
-                    sampleRate,
-                    channels
-                });
+                const nativeStatus = isAsio
+                    ? await window.audioDriver.openAsio({
+                        deviceId: selected.nativeId,
+                        sampleRate,
+                        channels
+                    })
+                    : await window.audioDriver.open({
+                        deviceId: selected.nativeId,
+                        sampleRate,
+                        channels
+                    });
                 opened = true;
 
                 const actualRate = nativeStatus.actualSampleRate || nativeStatus.sampleRate;
@@ -2094,7 +2146,8 @@
                     throw new Error(`Sample rate mismatch (${actualRate || 'unknown'} Hz)`);
                 }
 
-                node = new AudioWorkletNode(audioCtx, 'wasapi-output', {
+                const processorName = isAsio ? 'asio-output' : 'wasapi-output';
+                node = new AudioWorkletNode(audioCtx, processorName, {
                     numberOfInputs: 1,
                     numberOfOutputs: 1,
                     outputChannelCount: [2],
@@ -2104,9 +2157,9 @@
                 });
 
                 node.port.onmessage = event => {
-                    if (audioDriverConnected && window.audioDriver) {
-                        window.audioDriver.write(event.data);
-                    }
+                    if (!audioDriverConnected || !window.audioDriver) return;
+                    if (isAsio) window.audioDriver.writeAsio(event.data);
+                    else window.audioDriver.write(event.data);
                 };
 
                 compressorNode.disconnect(audioCtx.destination);
@@ -2116,9 +2169,10 @@
 
                 audioDriverWorkletNode = node;
                 activeAudioDriverId = selected.id;
+                activeAudioDriverBackend = backend;
                 audioDriverConnected = true;
                 updateAudioDriverUI();
-                showOnScreenNotification('WASAPI Driver সংযুক্ত হয়েছে');
+                showOnScreenNotification(`${backend} Driver সংযুক্ত হয়েছে`);
             } catch (error) {
                 if (node) {
                     try { node.disconnect(); } catch (_) {}
@@ -2129,14 +2183,18 @@
                     try { compressorNode.connect(audioCtx.destination); } catch (_) {}
                 }
                 if (opened) {
-                    try { await window.audioDriver.close(); } catch (_) {}
+                    try {
+                        if (isAsio) await window.audioDriver.closeAsio();
+                        else await window.audioDriver.close();
+                    } catch (_) {}
                 }
 
                 audioDriverWorkletNode = null;
                 activeAudioDriverId = null;
+                activeAudioDriverBackend = null;
                 audioDriverConnected = false;
                 updateAudioDriverUI('সংযোগ ব্যর্থ: ' + error.message);
-                showOnScreenNotification('WASAPI সংযোগ ব্যর্থ');
+                showOnScreenNotification(`${backend} সংযোগ ব্যর্থ`);
             } finally {
                 audioDriverBusy = false;
             }
@@ -2145,6 +2203,7 @@
         async function disconnectAudioDriver() {
             if (audioDriverBusy || !audioDriverConnected) return;
             audioDriverBusy = true;
+            const backend = activeAudioDriverBackend || 'WASAPI';
 
             try {
                 if (audioDriverWorkletNode) {
@@ -2157,12 +2216,15 @@
                     try { compressorNode.connect(audioCtx.destination); } catch (_) {}
                 }
 
-                await window.audioDriver.close();
+                if (backend === 'ASIO') await window.audioDriver.closeAsio();
+                else await window.audioDriver.close();
+
                 audioDriverWorkletNode = null;
                 activeAudioDriverId = null;
+                activeAudioDriverBackend = null;
                 audioDriverConnected = false;
-                updateAudioDriverUI('WASAPI সংযোগ বিচ্ছিন্ন');
-                showOnScreenNotification('WASAPI Driver বিচ্ছিন্ন হয়েছে');
+                updateAudioDriverUI(`${backend} সংযোগ বিচ্ছিন্ন`);
+                showOnScreenNotification(`${backend} Driver বিচ্ছিন্ন হয়েছে`);
             } catch (error) {
                 updateAudioDriverUI('বিচ্ছিন্ন করতে সমস্যা: ' + error.message);
             } finally {

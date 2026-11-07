@@ -30,7 +30,8 @@
       "tones/**/*",
       "style_loops/**/*",
       "build/Release/wasapi.node",
-      "native/vendor/rtaudio/LICENSE"
+      "native/vendor/rtaudio/LICENSE",
+      "build/Release/asio-helper.exe"
     ],
     "directories": {
       "output": "dist"

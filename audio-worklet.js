@@ -47,3 +47,5 @@ class WasapiOutputProcessor extends AudioWorkletProcessor {
 }
 
 registerProcessor('wasapi-output', WasapiOutputProcessor);
+
+registerProcessor('asio-output', class AsioOutputProcessor extends WasapiOutputProcessor {});
