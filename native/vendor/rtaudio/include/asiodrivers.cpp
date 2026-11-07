@@ -83,6 +83,7 @@ void AsioDrivers::removeCurrentDriver()
 
 #elif WINDOWS
 
+#include <objbase.h>
 #include "iasiodrv.h"
 
 extern IASIO* theAsioDriver;
