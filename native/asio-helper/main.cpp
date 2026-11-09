@@ -115,9 +115,9 @@ static int listDevices() {
             first = false;
 
             std::printf(
-                "{\"id\":%u,\"name\":\"%s\",\"outputChannels\":%u,"
+                "{\"id\":%u,\"name\":\"%s\",\"stableId\":\"%s\",\"outputChannels\":%u,"
                 "\"defaultSampleRate\":%u,\"sampleRates\":[",
-                id, jsonEscape(info.name).c_str(),
+                id, jsonEscape(info.name).c_str(), jsonEscape(info.name).c_str(),
                 info.outputChannels, info.preferredSampleRate
             );
 

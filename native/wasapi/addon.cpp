@@ -205,6 +205,7 @@ static napi_value GetDevices(napi_env env, napi_callback_info) {
 
             SetNumber(env, item, "id", id);
             SetString(env, item, "name", info.name);
+            SetString(env, item, "stableId", info.stableId);
             SetNumber(env, item, "outputChannels", info.outputChannels);
             SetBoolean(env, item, "isDefaultOutput", info.isDefaultOutput);
 

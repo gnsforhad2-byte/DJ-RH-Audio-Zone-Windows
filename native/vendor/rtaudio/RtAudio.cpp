@@ -5154,6 +5154,7 @@ bool RtApiWasapi::probeDeviceInfo( RtAudio::DeviceInfo &info, LPWSTR deviceId, b
   }
 
   info.name = convertCharPointerToStdString( deviceNameProp.pwszVal );
+  info.stableId = convertCharPointerToStdString( deviceId );
 
   // Get audio client
   hr = devicePtr->Activate( __uuidof( IAudioClient ), CLSCTX_ALL, NULL, ( void** ) &audioClient );

@@ -22,96 +22,6 @@
             overflow: hidden;
         }
 
-        #lock-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: #050508;
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .login-logo {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 5px;
-            margin-bottom: 10px;
-        }
-        .login-logo-icon {
-            font-size: 2.2rem;
-            filter: drop-shadow(0 0 10px rgba(0, 217, 255, 0.6));
-        }
-        .login-logo-text {
-            font-size: 1.3rem;
-            font-weight: 900;
-            color: #00d9ff;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            text-shadow: 0 0 12px rgba(0, 217, 255, 0.4);
-        }
-
-        .lock-box {
-            background: #111;
-            border: 2px solid #00d9ff;
-            padding: 20px 25px;
-            border-radius: 12px;
-            text-align: center;
-            box-shadow: 0 0 25px rgba(0, 217, 255, 0.3);
-            width: 320px;
-        }
-        .lock-box h2 {
-            font-size: 0.95rem;
-            color: #ffffff;
-            margin-bottom: 12px;
-            letter-spacing: 0.5px;
-        }
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-bottom: 12px;
-            text-align: left;
-        }
-        .input-group label {
-            font-size: 0.75rem;
-            color: #8b949e;
-        }
-        .login-input {
-            width: 100%;
-            background: #000;
-            border: 1px solid #333;
-            color: #00ffcc;
-            font-size: 0.85rem;
-            padding: 8px 10px;
-            border-radius: 6px;
-            outline: none;
-        }
-        .login-input:focus {
-            border-color: #00d9ff;
-        }
-        .login-btn {
-            width: 100%;
-            background: #00d9ff;
-            color: #000;
-            border: none;
-            padding: 10px;
-            font-size: 0.9rem;
-            font-weight: bold;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .login-btn:active {
-            background: #00a2ff;
-        }
-
         #force-landscape-wrapper {
             position: fixed;
             top: 0;
@@ -619,30 +529,6 @@
 </head>
 <body>
 
-    <div id="lock-screen">
-        <div class="login-logo">
-            <span class="login-logo-icon">🎹</span>
-            <span class="login-logo-text">ফরহাদ ভাই কিবোর্ড</span>
-        </div>
-
-        <div class="lock-box">
-            <h2>লগইন করতে তথ্য দিন</h2>
-            <div class="input-group">
-                <label>ইমেইল অ্যাড্রেস</label>
-                <input type="email" id="emailInput" class="login-input" value="admin@domain.com" placeholder="আপনার Firebase ইমেইল">
-            </div>
-            <div class="input-group">
-                <label>পাসওয়ার্ড</label>
-                <input type="password" id="passwordInput" class="login-input" value="123456" placeholder="আপনার পাসওয়ার্ড" onkeydown="checkEnter(event)">
-            </div>
-            <button class="login-btn" onclick="submitLogin()">লগইন করুন</button>
-            <div id="login-message" role="status" aria-live="polite"
-                 style="margin:12px auto 0;max-width:90%;text-align:center;
-                 color:#ffb3b3;font-size:14px;white-space:pre-wrap;
-                 overflow-wrap:anywhere;"></div>
-        </div>
-    </div>
-
     <div id="force-landscape-wrapper">
         <div class="header">
             <div class="left-controls">
@@ -875,10 +761,6 @@
     <input type="file" id="styleUpload" accept=".mp3, .wav, .mid, audio/*" onchange="loadAndSaveStyleDirect(event)">
     <input type="file" id="bgUpload" accept="image/*" onchange="loadCustomBackgroundImage(event)">
 
-    <script src="firebase/firebase-app-compat.js"
-      onerror="var m=document.getElementById('login-message');if(m)m.textContent='Firebase SDK লোড হয়নি। অ্যাপের SDK ফাইল পরীক্ষা করুন।';"></script>
-    <script src="firebase/firebase-auth-compat.js"
-      onerror="var m=document.getElementById('login-message');if(m)m.textContent='Firebase Auth SDK লোড হয়নি।';"></script>
     <script>
         const themesList = [
             { name: "রয়্যাল পার্পল গ্লো", bg: "linear-gradient(135deg, #4b0082 0%, #002b49 40%, #8b008b 80%, #ff1493 100%)" },
@@ -957,6 +839,9 @@
         document.addEventListener("DOMContentLoaded", function() {
             applyCurrentTheme();
             buildTickerContent();
+            initAudio();
+            initMidiIn();
+            restoreSavedAudioDriver();
             
             const track = document.getElementById("tickerTrack");
             if (track) {
@@ -975,134 +860,7 @@
             }
         });
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyDGmSJZkiznIE5rL88LLfnLs4sklpmbX7M",
-            authDomain: "dj-rh-audio-zone.firebaseapp.com",
-            projectId: "dj-rh-audio-zone",
-            storageBucket: "dj-rh-audio-zone.firebasestorage.app",
-            messagingSenderId: "875269298595",
-            appId: "1:875269298595:web:1afc6cbf52ae490f8fe216"
-        };
 
-        let keyboardAuth = null;
-        let authPersistenceReady = Promise.resolve();
-        let keyboardSessionReady = false;
-
-        function showLoginMessage(message, success = false) {
-            const box = document.getElementById('login-message');
-            if (box) {
-                box.textContent = message;
-                box.style.color = success ? '#9cffb0' : '#ffb3b3';
-            }
-        }
-
-        function firebaseErrorMessage(error) {
-            const code = error && error.code ? error.code : '';
-            const messages = {
-                'auth/invalid-email': 'ইমেইল ঠিকানাটি সঠিক নয়।',
-                'auth/user-not-found': 'এই ইমেইলে কোনো অ্যাকাউন্ট পাওয়া যায়নি।',
-                'auth/wrong-password': 'পাসওয়ার্ড ভুল হয়েছে। আবার চেষ্টা করুন।',
-                'auth/invalid-credential': 'ইমেইল অথবা পাসওয়ার্ড ভুল।',
-                'auth/invalid-login-credentials': 'ইমেইল অথবা পাসওয়ার্ড ভুল।',
-                'auth/user-disabled': 'এই অ্যাকাউন্টটি নিষ্ক্রিয় করা হয়েছে।',
-                'auth/too-many-requests': 'অনেকবার চেষ্টা করা হয়েছে। কিছুক্ষণ পর আবার চেষ্টা করুন।',
-                'auth/network-request-failed': 'ইন্টারনেট সংযোগ পরীক্ষা করে আবার চেষ্টা করুন।',
-                'auth/operation-not-allowed': 'Firebase Console-এ Email/Password sign-in চালু করুন।',
-                'auth/unauthorized-domain': 'Firebase Authentication-এর Authorized domains সেটিং পরীক্ষা করুন।',
-                'auth/weak-password': 'পাসওয়ার্ডটি আরও শক্তিশালী হতে হবে।'
-            };
-            return messages[code] || ('লগইন ব্যর্থ হয়েছে। ' +
-                (code ? 'কোড: ' + code : 'ইন্টারনেট ও Firebase সেটিং পরীক্ষা করুন।'));
-        }
-
-        function applyKeyboardAuthState(user) {
-            const lockScreen = document.getElementById('lock-screen');
-            const appWrapper = document.getElementById('force-landscape-wrapper');
-            if (!lockScreen || !appWrapper) return;
-
-            if (!user) {
-                lockScreen.style.display = 'flex';
-                appWrapper.style.display = 'none';
-                keyboardSessionReady = false;
-                return;
-            }
-
-            lockScreen.style.display = 'none';
-            appWrapper.style.display = 'flex';
-
-            if (!keyboardSessionReady) {
-                keyboardSessionReady = true;
-                initAudio();
-                initMidiIn();
-            }
-        }
-
-        try {
-            if (typeof firebase === 'undefined' ||
-                !firebase.apps ||
-                typeof firebase.auth !== 'function') {
-                throw new Error('Firebase SDK লোড হয়নি।');
-            }
-
-            if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-            keyboardAuth = firebase.auth();
-            authPersistenceReady = keyboardAuth.setPersistence(
-                firebase.auth.Auth.Persistence.LOCAL
-            );
-
-            keyboardAuth.onAuthStateChanged(
-                user => {
-                    applyKeyboardAuthState(user);
-                    if (user) showLoginMessage('', true);
-                },
-                error => {
-                    console.error('Firebase auth-state error:', error);
-                    applyKeyboardAuthState(null);
-                    showLoginMessage(firebaseErrorMessage(error));
-                }
-            );
-        } catch (error) {
-            console.error('Firebase initialization error:', error);
-            applyKeyboardAuthState(null);
-            showLoginMessage('Firebase চালু করা যায়নি। SDK ফাইল ও ইন্টারনেট পরীক্ষা করুন।');
-        }
-
-        async function submitLogin() {
-            const email = document.getElementById('emailInput').value.trim();
-            const password = document.getElementById('passwordInput').value;
-            const button = document.querySelector('.login-btn');
-
-            if (!email || !password) {
-                showLoginMessage('ইমেইল ও পাসওয়ার্ড—দুটিই লিখুন।');
-                return;
-            }
-
-            if (!keyboardAuth) {
-                showLoginMessage('Firebase প্রস্তুত নয়। অ্যাপ বন্ধ করে আবার খুলুন এবং ইন্টারনেট পরীক্ষা করুন।');
-                return;
-            }
-
-            if (button) button.disabled = true;
-            showLoginMessage('লগইন যাচাই করা হচ্ছে…');
-
-            try {
-                await authPersistenceReady;
-                await keyboardAuth.signInWithEmailAndPassword(email, password);
-                showLoginMessage('লগইন সফল।', true);
-            } catch (error) {
-                console.error('Firebase login failed:', error);
-                showLoginMessage(firebaseErrorMessage(error));
-            } finally {
-                if (button) button.disabled = false;
-            }
-        }
-
-        function checkEnter(event) {
-            if (event.key === 'Enter') submitLogin();
-        }
-
-        window.submitLogin = submitLogin;
-        window.checkEnter = checkEnter;
 
         let audioCtx = null;
         let delayNode = null, delayFeedbackNode = null, delayGainNode = null, delayLowFilter = null, delayHighFilter = null;
@@ -1890,6 +1648,43 @@
         let audioDriverWorkletNode = null;
         let audioDriverConnected = false;
         let audioDriverBusy = false;
+        const AUDIO_DRIVER_PREFERENCE_KEY = 'farhad_audio_driver_preference';
+        let audioDriverSavedPreferenceMissing = false;
+        let audioDriverRestoreStarted = false;
+
+        function getAudioDriverStableIdentity(device) {
+            if (!device || !device.stableId ||
+                typeof device.stableId !== 'string' ||
+                !device.stableId.trim()) return null;
+            return { backend: device.backend, stableId: device.stableId.trim() };
+        }
+
+        function persistAudioDriverSelection() {
+            const selected = audioDriverDevices[selectedAudioDriverIndex];
+            const identity = getAudioDriverStableIdentity(selected);
+            if (!identity) return false;
+            try {
+                localStorage.setItem(AUDIO_DRIVER_PREFERENCE_KEY, JSON.stringify(identity));
+                audioDriverSavedPreferenceMissing = false;
+                return true;
+            } catch (error) {
+                updateAudioDriverUI('ড্রাইভার পছন্দ সংরক্ষণ করা যায়নি');
+                return false;
+            }
+        }
+
+        function readSavedAudioDriverPreference() {
+            try {
+                const raw = localStorage.getItem(AUDIO_DRIVER_PREFERENCE_KEY);
+                if (!raw) return null;
+                const saved = JSON.parse(raw);
+                if (!saved || !['WASAPI', 'ASIO'].includes(saved.backend) ||
+                    typeof saved.stableId !== 'string' || !saved.stableId.trim()) return null;
+                return { backend: saved.backend, stableId: saved.stableId.trim() };
+            } catch (_) {
+                return null;
+            }
+        }
 
         function showPage(pageId) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -2011,10 +1806,13 @@
                 return;
             }
 
-            status.textContent = message || (audioDriverDevices.length
+            const missingPreferenceMessage = audioDriverSavedPreferenceMissing
+                ? 'সংরক্ষিত ড্রাইভার পাওয়া যায়নি — নতুন ড্রাইভার নিজে নির্বাচন করুন'
+                : '';
+            status.textContent = missingPreferenceMessage || message || (audioDriverDevices.length
                 ? 'ডিভাইস নির্বাচন করুন'
                 : 'কোনো WASAPI / ASIO output পাওয়া যায়নি');
-            status.style.color = message ? '#fbbf24' : '#00ffcc';
+            status.style.color = (missingPreferenceMessage || message) ? '#fbbf24' : '#00ffcc';
 
             const selected = audioDriverDevices[selectedAudioDriverIndex];
             device.textContent = selected
@@ -2023,6 +1821,32 @@
             format.textContent = selected
                 ? `Output channels: ${selected.outputChannels} • ID: ${selected.nativeId}`
                 : 'Windows-এ অ্যাপ চালিয়ে audio output পরীক্ষা করুন';
+        }
+
+        async function restoreSavedAudioDriver() {
+            if (audioDriverRestoreStarted) return;
+            audioDriverRestoreStarted = true;
+            const saved = readSavedAudioDriverPreference();
+            if (!saved) return;
+
+            await renderAudioDriverUI();
+
+            const savedIndex = audioDriverDevices.findIndex(device =>
+                device.backend === saved.backend && device.stableId === saved.stableId
+            );
+
+            if (savedIndex < 0) {
+                audioDriverSavedPreferenceMissing = true;
+                updateAudioDriverUI(
+                    'সংরক্ষিত ড্রাইভার পাওয়া যায়নি — অন্য ড্রাইভার স্বয়ংক্রিয়ভাবে চালু করা হয়নি'
+                );
+                return;
+            }
+
+            selectedAudioDriverIndex = savedIndex;
+            audioDriverSavedPreferenceMissing = false;
+            updateAudioDriverUI('সংরক্ষিত ড্রাইভারে সংযোগ হচ্ছে...');
+            await connectAudioDriver(true);
         }
 
         async function renderAudioDriverUI() {
@@ -2057,13 +1881,13 @@
                         ...d,
                         backend: 'WASAPI',
                         nativeId: d.id,
-                        id: `WASAPI:${d.id}`
+                        id: `WASAPI:${d.stableId || d.id}`
                     })),
                     ...asio.filter(d => Number(d.outputChannels) > 0).map(d => ({
                         ...d,
                         backend: 'ASIO',
                         nativeId: d.id,
-                        id: `ASIO:${d.id}`
+                        id: `ASIO:${d.stableId || d.id}`
                     }))
                 ];
 
@@ -2091,11 +1915,18 @@
             selectedAudioDriverIndex =
                 (selectedAudioDriverIndex + direction + audioDriverDevices.length) %
                 audioDriverDevices.length;
+            persistAudioDriverSelection();
             updateAudioDriverUI();
         }
 
-        async function connectAudioDriver() {
+        async function connectAudioDriver(isRestore = false) {
             if (audioDriverBusy || audioDriverConnected) return;
+            if (audioDriverSavedPreferenceMissing && !isRestore) {
+                updateAudioDriverUI(
+                    'সংরক্ষিত ড্রাইভার পাওয়া যায়নি — আগে তালিকা থেকে নতুন ড্রাইভার নির্বাচন করুন'
+                );
+                return;
+            }
 
             const selected = audioDriverDevices[selectedAudioDriverIndex];
             if (!selected) {
@@ -2106,6 +1937,8 @@
                 updateAudioDriverUI('Native audio / AudioWorklet সুবিধা পাওয়া যায়নি');
                 return;
             }
+
+            if (!isRestore) persistAudioDriverSelection();
 
             const backend = selected.backend || 'WASAPI';
             const isAsio = backend === 'ASIO';
