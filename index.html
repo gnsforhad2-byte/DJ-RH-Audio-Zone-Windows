@@ -1826,26 +1826,27 @@
         async function restoreSavedAudioDriver() {
             if (audioDriverRestoreStarted) return;
             audioDriverRestoreStarted = true;
-            const saved = readSavedAudioDriverPreference();
-            if (!saved) return;
 
             await renderAudioDriverUI();
 
-            const savedIndex = audioDriverDevices.findIndex(device =>
-                device.backend === saved.backend && device.stableId === saved.stableId
+            const focusriteIndex = audioDriverDevices.findIndex(device =>
+                device.backend === 'ASIO' &&
+                typeof device.name === 'string' &&
+                device.name.trim().toUpperCase() === 'FOCUSRITE USB ASIO'
             );
 
-            if (savedIndex < 0) {
+            if (focusriteIndex < 0) {
                 audioDriverSavedPreferenceMissing = true;
                 updateAudioDriverUI(
-                    'সংরক্ষিত ড্রাইভার পাওয়া যায়নি — অন্য ড্রাইভার স্বয়ংক্রিয়ভাবে চালু করা হয়নি'
+                    'FOCUSRITE USB ASIO পাওয়া যায়নি — অন্য ড্রাইভার স্বয়ংক্রিয়ভাবে চালু করা হয়নি'
                 );
                 return;
             }
 
-            selectedAudioDriverIndex = savedIndex;
+            selectedAudioDriverIndex = focusriteIndex;
             audioDriverSavedPreferenceMissing = false;
-            updateAudioDriverUI('সংরক্ষিত ড্রাইভারে সংযোগ হচ্ছে...');
+            persistAudioDriverSelection();
+            updateAudioDriverUI('FOCUSRITE USB ASIO স্বয়ংক্রিয়ভাবে সংযোগ হচ্ছে...');
             await connectAudioDriver(true);
         }
 
