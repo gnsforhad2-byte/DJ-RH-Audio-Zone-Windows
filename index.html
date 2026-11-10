@@ -499,30 +499,53 @@
   }
 }
 
-/* LCD SIDE GAP FIX */
+/* LCD + CONTROL PANEL LAYOUT */
 .header {
     justify-content: flex-start;
-    gap: 4px;
+    gap: 0;
+    padding: 0;
+    height: 107px;
+    box-sizing: border-box;
 }
 
 .left-controls {
-    flex: 0 0 auto;
+    flex: 1 1 0;
     min-width: 0;
-    gap: 4px;
+    gap: 0;
+    justify-content: space-between;
+    padding: 0;
+}
+
+.btn-col,
+.right-col {
+    gap: 6px;
+}
+
+.control-btn,
+.right-btn {
+    width: 48px;
+    height: 48px;
+    flex: 0 0 48px;
+    border-radius: 50%;
+    box-sizing: border-box;
 }
 
 .phone-display {
-    flex: 1 1 0;
-    width: 0;
-    min-width: 160px;
+    flex: 0 0 185px;
+    width: 185px;
+    min-width: 0;
+    height: 104px;
     margin: 0;
-    aspect-ratio: auto;
+    aspect-ratio: 16 / 9;
+    box-sizing: border-box;
 }
 
 .controls-group {
-    flex: 0 0 auto;
-    gap: 4px;
-    padding-right: 0;
+    flex: 1 1 0;
+    min-width: 0;
+    gap: 0;
+    padding: 0;
+    justify-content: space-between;
 }
 
 </style>

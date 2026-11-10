@@ -26,7 +26,6 @@
       "preload.js",
       "index.html",
       "tones.json",
-      "firebase/**/*",
       "tones/**/*",
       "style_loops/**/*",
       "build/Release/wasapi.node",
