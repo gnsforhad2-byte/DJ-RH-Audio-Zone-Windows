@@ -2,7 +2,7 @@ class WasapiOutputProcessor extends AudioWorkletProcessor {
   constructor(options) {
     super();
     this.channels = options.processorOptions.channels || 2;
-    this.blockFrames = 1024;
+    this.blockFrames = 256;
     this.buffer = new Float32Array(this.blockFrames * this.channels);
     this.frames = 0;
   }

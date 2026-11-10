@@ -32,7 +32,7 @@ static std::string jsonEscape(const std::string& s) {
 }
 
 struct FloatRing {
-    static constexpr size_t CAP = 1u << 18;
+    static constexpr size_t CAP = 1u << 13;
     std::vector<float> data;
     std::atomic<size_t> readAt{0};
     std::atomic<size_t> writeAt{0};
@@ -161,7 +161,7 @@ static int playDevice(unsigned int deviceId,
         output.nChannels = channels;
         output.firstChannel = 0;
 
-        unsigned int bufferFrames = 0;
+        unsigned int bufferFrames = 128;
         audio.openStream(
             &output, nullptr, RTAUDIO_FLOAT32, sampleRate,
             &bufferFrames, &audioCallback, &state
