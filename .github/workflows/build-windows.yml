@@ -40,9 +40,10 @@ jobs:
           if (!(Test-Path -LiteralPath $bundle -PathType Container)) {
             throw "VST3 bundle directory not found: $bundle"
           }
-          Get-ChildItem -LiteralPath $bundle -Force -Recurse |
-            Select-Object FullName, Length, Mode |
-            Format-Table -AutoSize
+          Get-ChildItem -LiteralPath $bundle -Force -Recurse | ForEach-Object {
+            $type = if ($_.PSIsContainer) { "DIR" } else { "FILE" }
+            Write-Host ("ITEM: " + $_.FullName + " | SIZE: " + $_.Length + " | TYPE: " + $type)
+          }
 
       - name: Build Windows installer
         run: npx electron-builder --win nsis --x64 --publish never
