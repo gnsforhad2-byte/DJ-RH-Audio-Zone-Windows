@@ -27,8 +27,25 @@ jobs:
       - name: Install dependencies
         run: npm install --no-audit --no-fund
 
-      - name: Build Windows app and VST3 installer
-        run: npm run build:win
+      - name: Build Windows native audio helper
+        run: npm run build:native:win
+
+      - name: Build VST3 plugin
+        run: npm run build:vst3:win
+
+      - name: Diagnose VST3 bundle contents
+        shell: pwsh
+        run: |
+          $bundle = "build/vst3-cmake/VST3/Release/DJ RH Audio Zone.vst3"
+          if (!(Test-Path -LiteralPath $bundle -PathType Container)) {
+            throw "VST3 bundle directory not found: $bundle"
+          }
+          Get-ChildItem -LiteralPath $bundle -Force -Recurse |
+            Select-Object FullName, Length, Mode |
+            Format-Table -AutoSize
+
+      - name: Build Windows installer
+        run: npx electron-builder --win nsis --x64 --publish never
 
       - name: Verify VST3 bundle
         shell: pwsh
