@@ -7,9 +7,10 @@
   "license": "UNLICENSED",
   "scripts": {
     "start": "electron .",
-    "build:win": "npm run build:native:win && electron-builder --win nsis --x64 --publish never",
+    "build:win": "npm run build:native:win && npm run build:vst3:win && electron-builder --win nsis --x64 --publish never",
     "build:native:win": "node-gyp rebuild --target=45.2.3 --arch=x64 --runtime=electron --dist-url=https://electronjs.org/headers",
-    "install": "node -e \"process.exit(0)\""
+    "install": "node -e \"process.exit(0)\"",
+    "build:vst3:win": "cmake -S native/vst3 -B build/vst3-cmake -A x64 -DSMTG_CREATE_PLUGIN_LINK=OFF && cmake --build build/vst3-cmake --config Release --target DJRH_Audio_Zone"
   },
   "devDependencies": {
     "electron": "45.2.3",
@@ -49,10 +50,12 @@
     },
     "nsis": {
       "oneClick": false,
-      "perMachine": false,
+      "perMachine": true,
       "allowToChangeInstallationDirectory": true,
       "installerIcon": "assets/app-icon.ico",
-      "uninstallerIcon": "assets/app-icon.ico"
+      "uninstallerIcon": "assets/app-icon.ico",
+      "allowElevation": true,
+      "include": "installer/installer.nsh"
     }
   }
 }

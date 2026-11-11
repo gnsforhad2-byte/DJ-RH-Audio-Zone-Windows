@@ -17,6 +17,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           lfs: true
+          submodules: recursive
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -26,8 +27,16 @@ jobs:
       - name: Install dependencies
         run: npm install --no-audit --no-fund
 
-      - name: Build Windows installer
+      - name: Build Windows app and VST3 installer
         run: npm run build:win
+
+      - name: Verify VST3 bundle
+        shell: pwsh
+        run: |
+          $plugin = "build/vst3-cmake/VST3/Release/DJ RH Audio Zone.vst3/Contents/x86_64-win/DJ RH Audio Zone.vst3"
+          if (!(Test-Path -LiteralPath $plugin -PathType Leaf)) {
+            throw "VST3 plugin binary not found: $plugin"
+          }
 
       - name: Upload installer artifact
         uses: actions/upload-artifact@v4
