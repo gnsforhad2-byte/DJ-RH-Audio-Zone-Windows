@@ -1,0 +1,43 @@
+name: Build Windows VST3 Plugin
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-vst3:
+    runs-on: windows-2022
+    steps:
+      - name: Checkout source and VST3 SDK
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Show CMake version
+        run: cmake --version
+
+      - name: Configure VST3 plugin
+        run: cmake -S native/vst3 -B build/vst3-cmake -A x64
+
+      - name: Build VST3 plugin
+        run: cmake --build build/vst3-cmake --config Release --target DJRH_Audio_Zone
+
+      - name: Verify and package VST3 bundle
+        shell: pwsh
+        run: |
+          $bundle = "build/vst3-cmake/VST3/Release/DJ RH Audio Zone.vst3"
+          $plugin = Join-Path $bundle "Contents/x86_64-win/DJ RH Audio Zone.vst3"
+          if (!(Test-Path -LiteralPath $plugin -PathType Leaf)) {
+            throw "VST3 plugin binary not found: $plugin"
+          }
+          Compress-Archive -LiteralPath $bundle -DestinationPath "build/DJ-RH-Audio-Zone-VST3-Windows.zip" -Force
+
+      - name: Upload VST3 plugin artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DJ-RH-Audio-Zone-VST3-Windows
+          path: build/DJ-RH-Audio-Zone-VST3-Windows.zip
+          if-no-files-found: error
+          retention-days: 30
