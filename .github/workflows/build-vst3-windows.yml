@@ -9,11 +9,13 @@ permissions:
 jobs:
   build-vst3:
     runs-on: windows-2022
+
     steps:
       - name: Checkout source and VST3 SDK
         uses: actions/checkout@v4
         with:
           submodules: recursive
+          lfs: true
 
       - name: Show CMake version
         run: cmake --version
@@ -24,14 +26,31 @@ jobs:
       - name: Build VST3 plugin
         run: cmake --build build/vst3-cmake --config Release --target DJRH_Audio_Zone
 
-      - name: Verify and package VST3 bundle
+      - name: Package bundled tones
         shell: pwsh
         run: |
           $bundle = "build/vst3-cmake/VST3/Release/DJ RH Audio Zone.vst3"
+          $resources = Join-Path $bundle "Contents/Resources"
           $plugin = Join-Path $bundle "Contents/x86_64-win/DJ RH Audio Zone.vst3"
           if (!(Test-Path -LiteralPath $plugin -PathType Leaf)) {
             throw "VST3 plugin binary not found: $plugin"
           }
+
+          New-Item -ItemType Directory -Force -Path $resources | Out-Null
+          Copy-Item -Path "tones" -Destination (Join-Path $resources "tones") -Recurse -Force
+          Copy-Item -Path "tones.json" -Destination (Join-Path $resources "tones.json") -Force
+
+          $count = (Get-ChildItem -LiteralPath (Join-Path $resources "tones") -File).Count
+          if ($count -ne 134) {
+            throw "Expected 134 bundled tone files, found $count"
+          }
+
+          Write-Host "Bundled tone files: $count"
+
+      - name: Verify and package VST3 bundle
+        shell: pwsh
+        run: |
+          $bundle = "build/vst3-cmake/VST3/Release/DJ RH Audio Zone.vst3"
           Compress-Archive -LiteralPath $bundle -DestinationPath "build/DJ-RH-Audio-Zone-VST3-Windows.zip" -Force
 
       - name: Upload VST3 plugin artifact

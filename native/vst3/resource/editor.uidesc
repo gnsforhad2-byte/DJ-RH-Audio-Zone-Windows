@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<vstgui-ui-description version="1">
+  <colors>
+    <color name="Background" rgba="#101827FF"/>
+    <color name="Panel" rgba="#19263AFF"/>
+    <color name="Accent" rgba="#168BFFFF"/>
+    <color name="Text" rgba="#F2F6FFFF"/>
+  </colors>
+  <fonts>
+    <font name="TitleFont" font-name="Arial" size="22" bold="true"/>
+    <font name="NormalFont" font-name="Arial" size="13"/>
+  </fonts>
+  <template name="view" class="CViewContainer" size="620,420" background-color="Background">
+    <view class="CViewContainer" origin="18,18" size="584,384" background-color="Panel">
+      <view class="CTextLabel" origin="20,18" size="544,38" font="TitleFont" title="DJ RH AUDIO ZONE" text-color="Accent"/>
+      <view class="CTextLabel" origin="20,76" size="120,24" font="NormalFont" title="SELECT TONE" text-color="Text"/>
+      <view class="COptionMenu" origin="20,106" size="544,32" control-tag="1000" font="NormalFont"/>
+      <view class="CTextLabel" origin="20,165" size="544,28" font="NormalFont" title="134 bundled instrument tones" text-color="Text"/>
+      <view class="CTextLabel" origin="20,220" size="544,28" font="NormalFont" title="MIDI Instrument" text-color="Text"/>
+    </view>
+  </template>
+</vstgui-ui-description>
