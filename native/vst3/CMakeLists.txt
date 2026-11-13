@@ -19,7 +19,7 @@ set(plugin_sources
 )
 
 smtg_add_vst3plugin(DJRH_Audio_Zone
-    PACKAGE_NAME "DJ RH Audio Zone"
+    PACKAGE_NAME "DJRH_Audio_Zone"
     SOURCES_LIST ${plugin_sources}
 )
 

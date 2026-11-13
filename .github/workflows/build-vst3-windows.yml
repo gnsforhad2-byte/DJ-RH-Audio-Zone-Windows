@@ -29,9 +29,9 @@ jobs:
       - name: Package bundled tones
         shell: pwsh
         run: |
-          $bundle = "build/vst3-cmake/VST3/Release/DJ RH Audio Zone.vst3"
+          $bundle = "build/vst3-cmake/VST3/Release/DJRH_Audio_Zone.vst3"
           $resources = Join-Path $bundle "Contents/Resources"
-          $plugin = Join-Path $bundle "Contents/x86_64-win/DJ RH Audio Zone.vst3"
+          $plugin = Join-Path $bundle "Contents/x86_64-win/DJRH_Audio_Zone.vst3"
 
           if (!(Test-Path -LiteralPath $plugin -PathType Leaf)) {
             throw "VST3 plugin binary not found: $plugin"
@@ -51,7 +51,7 @@ jobs:
       - name: Verify and package VST3 bundle
         shell: pwsh
         run: |
-          $bundle = "build/vst3-cmake/VST3/Release/DJ RH Audio Zone.vst3"
+          $bundle = "build/vst3-cmake/VST3/Release/DJRH_Audio_Zone.vst3"
           if (!(Test-Path -LiteralPath $bundle -PathType Container)) {
             throw "VST3 bundle not found: $bundle"
           }
