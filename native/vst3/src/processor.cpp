@@ -62,9 +62,23 @@ DJRHProcessor::DJRHProcessor() {
 }
 
 DJRHProcessor::~DJRHProcessor() {
+    stopSampleLoader();
+}
+
+void DJRHProcessor::stopSampleLoader() {
     stopLoader.store(true, std::memory_order_release);
     loaderWake.notify_all();
-    if (loaderThread.joinable()) loaderThread.join();
+    if (loaderThread.joinable())
+        loaderThread.join();
+}
+
+tresult PLUGIN_API DJRHProcessor::terminate() {
+    stopSampleLoader();
+    std::atomic_store_explicit(
+        &currentSample,
+        std::shared_ptr<const SampleData>{},
+        std::memory_order_release);
+    return AudioEffect::terminate();
 }
 
 tresult PLUGIN_API DJRHProcessor::initialize(FUnknown* context) {

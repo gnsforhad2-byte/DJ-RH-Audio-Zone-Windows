@@ -27,6 +27,7 @@ public:
     }
 
     tresult PLUGIN_API initialize(FUnknown* context) SMTG_OVERRIDE;
+    tresult PLUGIN_API terminate() SMTG_OVERRIDE;
     tresult PLUGIN_API setActive(TBool state) SMTG_OVERRIDE;
     tresult PLUGIN_API setupProcessing(ProcessSetup& setup) SMTG_OVERRIDE;
     tresult PLUGIN_API setBusArrangements(
@@ -62,6 +63,7 @@ private:
         }
     };
 
+    void stopSampleLoader();
     void handleEvent(const Event& event);
     void requestTone(int index);
     void sampleLoaderLoop();
