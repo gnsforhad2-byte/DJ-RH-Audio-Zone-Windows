@@ -26,7 +26,7 @@ namespace Steinberg {
 namespace Vst {
 namespace {
 constexpr ParamID kToneParamID = 1000;
-constexpr double kReleaseSeconds = 0.18;
+
 int g_moduleAnchor = 0;
 
 std::filesystem::path moduleDirectory() {
@@ -267,8 +267,16 @@ void DJRHProcessor::render(
     Event nextEvent{};
     bool hasEvent = eventIndex < eventCount &&
         events->getEvent(eventIndex, nextEvent) == kResultOk;
+    const int releaseValue = std::clamp(
+        releasePercent.load(std::memory_order_relaxed), 0, 100);
+    const double releaseSeconds =
+        0.02 + (double(releaseValue) / 100.0) * 0.98;
     const double releaseStep =
-        std::exp(-1.0 / (sampleRate * kReleaseSeconds));
+        std::exp(-1.0 / (sampleRate * releaseSeconds));
+    const float volumeLevel = std::clamp(
+        volume.load(std::memory_order_relaxed), 0.0f, 1.0f);
+    const int pitchShift =
+        semitoneShift.load(std::memory_order_relaxed);
     const uint64 frames = sample->frameCount();
     const uint32 srcChannels = sample->channels;
 
@@ -298,12 +306,13 @@ void DJRHProcessor::render(
             float r0 = srcChannels > 1 ? sample->samples[a + 1] : l0;
             float l1 = sample->samples[b];
             float r1 = srcChannels > 1 ? sample->samples[b + 1] : l1;
-            float gain = voice.velocity * voice.envelope;
+            float gain = voice.velocity * voice.envelope * volumeLevel;
             left += (l0 + (l1 - l0) * frac) * gain;
             right += (r0 + (r1 - r0) * frac) * gain;
 
             double ratio = std::pow(
-                2.0, double(voice.note - sample->rootMidiNote) / 12.0);
+                2.0,
+                double(int(voice.note) + pitchShift - sample->rootMidiNote) / 12.0);
             voice.cursor += ratio * double(sample->sourceSampleRate) / sampleRate;
 
             if (voice.releasing) {
@@ -323,48 +332,111 @@ void DJRHProcessor::render(
 }
 
 tresult PLUGIN_API DJRHProcessor::process(ProcessData& data) {
-    if (data.numOutputs < 1 || !data.outputs) return kResultOk;
+    if (data.numOutputs < 1 || !data.outputs)
+        return kResultOk;
+
     auto& bus = data.outputs[0];
-    if (data.numSamples <= 0 || bus.numChannels <= 0) return kResultOk;
+    if (data.numSamples <= 0 || bus.numChannels <= 0)
+        return kResultOk;
+
+    constexpr ParamID kToneParamID = 1000;
+    constexpr ParamID kVolumeParamID = 1010;
+    constexpr ParamID kReleaseParamID = 1011;
+    constexpr ParamID kSemitoneParamID = 1012;
 
     if (data.inputParameterChanges) {
         int32 count = data.inputParameterChanges->getParameterCount();
+
         for (int32 q = 0; q < count; ++q) {
-            auto* queue = data.inputParameterChanges->getParameterData(q);
-            if (!queue || queue->getParameterId() != kToneParamID) continue;
-            int32 points = queue->getPointCount();
-            if (points > 0) {
-                int32 offset = 0;
-                ParamValue value = 0;
-                if (queue->getPoint(points - 1, offset, value) == kResultOk)
+            auto* queue =
+                data.inputParameterChanges->getParameterData(q);
+            if (!queue)
+                continue;
+
+            const ParamID id = queue->getParameterId();
+            if (id != kToneParamID &&
+                id != kVolumeParamID &&
+                id != kReleaseParamID &&
+                id != kSemitoneParamID)
+                continue;
+
+            const int32 points = queue->getPointCount();
+            if (points <= 0)
+                continue;
+
+            int32 offset = 0;
+            ParamValue value = 0.0;
+            if (queue->getPoint(points - 1, offset, value) != kResultOk)
+                continue;
+
+            value = std::clamp(value, 0.0, 1.0);
+
+            switch (id) {
+                case kToneParamID:
                     requestTone(toneIndex(value));
+                    break;
+
+                case kVolumeParamID:
+                    volume.store(
+                        float(value), std::memory_order_relaxed);
+                    break;
+
+                case kReleaseParamID:
+                    releasePercent.store(
+                        int(std::lround(value * 100.0)),
+                        std::memory_order_relaxed);
+                    break;
+
+                case kSemitoneParamID:
+                    semitoneShift.store(
+                        int(std::lround(-42.0 + value * 84.0)),
+                        std::memory_order_relaxed);
+                    break;
             }
         }
     }
 
     auto sample = std::atomic_load_explicit(
         &currentSample, std::memory_order_acquire);
-    if (data.symbolicSampleSize == kSample32)
-        render(bus.channelBuffers32, bus.numChannels, data.numSamples,
-               data.inputEvents, sample);
-    else if (data.symbolicSampleSize == kSample64)
-        render(bus.channelBuffers64, bus.numChannels, data.numSamples,
-               data.inputEvents, sample);
-    else
+
+    if (data.symbolicSampleSize == kSample32) {
+        render(
+            bus.channelBuffers32, bus.numChannels, data.numSamples,
+            data.inputEvents, sample);
+    } else if (data.symbolicSampleSize == kSample64) {
+        render(
+            bus.channelBuffers64, bus.numChannels, data.numSamples,
+            data.inputEvents, sample);
+    } else {
         return kResultFalse;
+    }
 
     bus.silenceFlags = 0;
     return kResultOk;
 }
-
 
 tresult PLUGIN_API DJRHProcessor::getState(IBStream* state) {
     if (!state)
         return kResultFalse;
 
     IBStreamer streamer(state, kLittleEndian);
-    const int32 tone = selectedToneIndex.load(std::memory_order_acquire);
-    return streamer.writeInt32(tone) ? kResultOk : kResultFalse;
+
+    const int32 tone =
+        selectedToneIndex.load(std::memory_order_acquire);
+    const int32 volumeValue = int32(std::lround(
+        std::clamp(volume.load(std::memory_order_relaxed), 0.0f, 1.0f)
+        * 100.0f));
+    const int32 releaseValue =
+        releasePercent.load(std::memory_order_relaxed);
+    const int32 pitchValue =
+        semitoneShift.load(std::memory_order_relaxed);
+
+    if (!streamer.writeInt32(tone)) return kResultFalse;
+    if (!streamer.writeInt32(volumeValue)) return kResultFalse;
+    if (!streamer.writeInt32(releaseValue)) return kResultFalse;
+    if (!streamer.writeInt32(pitchValue)) return kResultFalse;
+
+    return kResultOk;
 }
 
 tresult PLUGIN_API DJRHProcessor::setState(IBStream* state) {
@@ -372,11 +444,33 @@ tresult PLUGIN_API DJRHProcessor::setState(IBStream* state) {
         return kResultFalse;
 
     IBStreamer streamer(state, kLittleEndian);
+
     int32 savedTone = 0;
     if (!streamer.readInt32(savedTone))
         return kResultFalse;
 
+    // Legacy presets contain only the tone index.
+    // Missing fields keep the backward-compatible defaults.
+    int32 savedVolume = 85;
+    int32 savedRelease = 16;
+    int32 savedSemitone = 0;
+
+    streamer.readInt32(savedVolume);
+    streamer.readInt32(savedRelease);
+    streamer.readInt32(savedSemitone);
+
     requestTone(std::clamp<int32>(savedTone, 0, 133));
+
+    volume.store(
+        float(std::clamp<int32>(savedVolume, 0, 100)) / 100.0f,
+        std::memory_order_relaxed);
+    releasePercent.store(
+        std::clamp<int32>(savedRelease, 0, 100),
+        std::memory_order_relaxed);
+    semitoneShift.store(
+        std::clamp<int32>(savedSemitone, -42, 42),
+        std::memory_order_relaxed);
+
     return kResultOk;
 }
 

@@ -78,6 +78,9 @@ private:
     std::filesystem::path toneDirectory;
 
     std::atomic<int> selectedToneIndex {0};
+    std::atomic<float> volume {0.85f};
+    std::atomic<int> releasePercent {16};
+    std::atomic<int> semitoneShift {0};
     std::atomic<int> requestedTone {-1};
     std::atomic<bool> stopLoader {false};
     std::mutex loaderWaitMutex;
