@@ -153,12 +153,11 @@ VSTGUI::CView* DJRHController::verifyView(
     if (!verified)
         return nullptr;
 
-    const int32 tag = verified->getTag();
-    if (tag >= kButtonToneDown && tag <= kButtonSemitoneUp) {
-        if (auto* button =
-                dynamic_cast<VSTGUI::CTextButton*>(verified)) {
+    if (auto* button =
+            dynamic_cast<VSTGUI::CTextButton*>(verified)) {
+        const int32 tag = button->getTag();
+        if (tag >= kButtonToneDown && tag <= kButtonSemitoneUp)
             button->setListener(this);
-        }
     }
 
     return verified;
