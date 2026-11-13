@@ -17,11 +17,17 @@ tresult PLUGIN_API DJRHController::initialize(FUnknown* context) {
         return result;
 
     auto* tone = new StringListParameter(
-        USTRING("Tone"), kToneParamID);
+        STR16("Tone"), kToneParamID);
 
     for (const char* name : DJRH::ToneNames) {
         String128 label {};
-        Steinberg::UString(label, 128).fromAscii(name);
+        size_t i = 0;
+        while (name[i] && i < 127) {
+            label[i] = static_cast<TChar>(
+                static_cast<unsigned char>(name[i]));
+            ++i;
+        }
+        label[i] = 0;
         tone->appendString(label);
     }
 
