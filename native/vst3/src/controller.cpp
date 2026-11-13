@@ -2,6 +2,9 @@
 #include "tone_names.h"
 #include "pluginterfaces/base/fstrdefs.h"
 #include "public.sdk/source/vst/vstparameters.h"
+#include "base/source/fstreamer.h"
+
+#include <algorithm>
 
 namespace Steinberg {
 namespace Vst {
@@ -24,6 +27,21 @@ tresult PLUGIN_API DJRHController::initialize(FUnknown* context) {
 
     parameters.addParameter(tone);
     return kResultOk;
+}
+
+
+tresult PLUGIN_API DJRHController::setComponentState(IBStream* state) {
+    if (!state)
+        return kResultFalse;
+
+    IBStreamer streamer(state, kLittleEndian);
+    int32 savedTone = 0;
+    if (!streamer.readInt32(savedTone))
+        return kResultFalse;
+
+    savedTone = std::clamp<int32>(savedTone, 0, 133);
+    return setParamNormalized(
+        kToneParamID, static_cast<ParamValue>(savedTone) / 133.0);
 }
 
 IPlugView* PLUGIN_API DJRHController::createView(const char* name) {

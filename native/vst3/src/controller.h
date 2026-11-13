@@ -1,5 +1,6 @@
 #pragma once
 #include "public.sdk/source/vst/vsteditcontroller.h"
+#include "pluginterfaces/base/ibstream.h"
 #include "vstgui/plugin-bindings/vst3editor.h"
 
 namespace Steinberg {
@@ -13,6 +14,7 @@ public:
     }
 
     tresult PLUGIN_API initialize(FUnknown* context) SMTG_OVERRIDE;
+    tresult PLUGIN_API setComponentState(IBStream* state) SMTG_OVERRIDE;
     IPlugView* PLUGIN_API createView(const char* name) SMTG_OVERRIDE;
     tresult PLUGIN_API queryInterface(const TUID iid, void** obj) SMTG_OVERRIDE;
 

@@ -24,6 +24,7 @@ smtg_add_vst3plugin(DJRH_Audio_Zone
 )
 
 target_compile_features(DJRH_Audio_Zone PRIVATE cxx_std_17)
+target_include_directories(DJRH_Audio_Zone PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/third_party")
 target_link_libraries(DJRH_Audio_Zone PRIVATE sdk vstgui_support)
 
 smtg_target_add_plugin_resources(DJRH_Audio_Zone

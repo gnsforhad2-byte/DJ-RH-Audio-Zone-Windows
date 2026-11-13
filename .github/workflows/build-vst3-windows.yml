@@ -21,7 +21,7 @@ jobs:
         run: cmake --version
 
       - name: Configure VST3 plugin
-        run: cmake -S native/vst3 -B build/vst3-cmake -A x64
+        run: cmake -S native/vst3 -B build/vst3-cmake -A x64 -DSMTG_CREATE_BUNDLE_FOR_WINDOWS=ON
 
       - name: Build VST3 plugin
         run: cmake --build build/vst3-cmake --config Release --target DJRH_Audio_Zone
@@ -32,6 +32,7 @@ jobs:
           $bundle = "build/vst3-cmake/VST3/Release/DJ RH Audio Zone.vst3"
           $resources = Join-Path $bundle "Contents/Resources"
           $plugin = Join-Path $bundle "Contents/x86_64-win/DJ RH Audio Zone.vst3"
+
           if (!(Test-Path -LiteralPath $plugin -PathType Leaf)) {
             throw "VST3 plugin binary not found: $plugin"
           }
@@ -51,6 +52,9 @@ jobs:
         shell: pwsh
         run: |
           $bundle = "build/vst3-cmake/VST3/Release/DJ RH Audio Zone.vst3"
+          if (!(Test-Path -LiteralPath $bundle -PathType Container)) {
+            throw "VST3 bundle not found: $bundle"
+          }
           Compress-Archive -LiteralPath $bundle -DestinationPath "build/DJ-RH-Audio-Zone-VST3-Windows.zip" -Force
 
       - name: Upload VST3 plugin artifact
