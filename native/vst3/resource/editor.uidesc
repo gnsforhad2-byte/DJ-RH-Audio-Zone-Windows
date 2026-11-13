@@ -1,22 +1,98 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <vstgui-ui-description version="1">
   <colors>
-    <color name="Background" rgba="#101827FF"/>
-    <color name="Panel" rgba="#19263AFF"/>
-    <color name="Accent" rgba="#168BFFFF"/>
-    <color name="Text" rgba="#F2F6FFFF"/>
+    <color name="Background" rgba="#09090BFF"/>
+    <color name="Panel" rgba="#15151BFF"/>
+    <color name="PanelEdge" rgba="#30303AFF"/>
+    <color name="Accent" rgba="#00FFFFFF"/>
+    <color name="Blue" rgba="#00A2FFFF"/>
+    <color name="BlueDark" rgba="#003A66FF"/>
+    <color name="Text" rgba="#FFFFFFFF"/>
+    <color name="Muted" rgba="#A8B4C8FF"/>
+    <color name="Magenta" rgba="#FF66FFFF"/>
+    <color name="Green" rgba="#00FF88FF"/>
+    <color name="Gold" rgba="#FFCC00FF"/>
   </colors>
+
   <fonts>
-    <font name="TitleFont" font-name="Arial" size="22" bold="true"/>
+    <font name="BrandFont" font-name="Arial" size="25" bold="true"/>
+    <font name="SectionFont" font-name="Arial" size="15" bold="true"/>
     <font name="NormalFont" font-name="Arial" size="13"/>
+    <font name="SmallFont" font-name="Arial" size="11"/>
   </fonts>
-  <template name="view" class="CViewContainer" size="620,420" background-color="Background">
-    <view class="CViewContainer" origin="18,18" size="584,384" background-color="Panel">
-      <view class="CTextLabel" origin="20,18" size="544,38" font="TitleFont" title="DJ RH AUDIO ZONE" text-color="Accent"/>
-      <view class="CTextLabel" origin="20,76" size="120,24" font="NormalFont" title="SELECT TONE" text-color="Text"/>
-      <view class="COptionMenu" origin="20,106" size="544,32" control-tag="1000" font="NormalFont"/>
-      <view class="CTextLabel" origin="20,165" size="544,28" font="NormalFont" title="134 bundled instrument tones" text-color="Text"/>
-      <view class="CTextLabel" origin="20,220" size="544,28" font="NormalFont" title="MIDI Instrument" text-color="Text"/>
+
+  <template name="view" class="CViewContainer" size="900,520" background-color="Background">
+
+    <!-- Main instrument chassis -->
+    <view class="CViewContainer" origin="12,12" size="876,496" background-color="Panel">
+
+      <!-- Top header -->
+      <view class="CViewContainer" origin="0,0" size="876,62" background-color="Background">
+        <view class="CTextLabel" origin="22,13" size="470,34"
+              font="BrandFont" title="DJ RH AUDIO ZONE" text-color="Accent"/>
+        <view class="CTextLabel" origin="620,18" size="230,24"
+              font="SmallFont" title="VST3  •  MIDI INSTRUMENT" text-color="Muted"/>
+      </view>
+
+      <!-- Left information panel -->
+      <view class="CViewContainer" origin="18,80" size="170,292" background-color="Background">
+        <view class="CTextLabel" origin="14,18" size="142,28"
+              font="SectionFont" title="INSTRUMENT" text-color="Magenta"/>
+        <view class="CTextLabel" origin="14,66" size="142,24"
+              font="NormalFont" title="134 TONES" text-color="Text"/>
+        <view class="CTextLabel" origin="14,100" size="142,22"
+              font="SmallFont" title="Bundled sound bank" text-color="Muted"/>
+        <view class="CTextLabel" origin="14,158" size="142,24"
+              font="SectionFont" title="PLAYBACK" text-color="Green"/>
+        <view class="CTextLabel" origin="14,196" size="142,22"
+              font="SmallFont" title="Play notes from" text-color="Muted"/>
+        <view class="CTextLabel" origin="14,218" size="142,22"
+              font="SmallFont" title="your MIDI keyboard" text-color="Muted"/>
+      </view>
+
+      <!-- Blue LCD area -->
+      <view class="CViewContainer" origin="204,80" size="468,292" background-color="BlueDark">
+        <view class="CViewContainer" origin="5,5" size="458,282" background-color="Blue">
+          <view class="CTextLabel" origin="18,15" size="420,28"
+                font="SectionFont" title="TONE DISPLAY" text-color="Text"/>
+          <view class="CTextLabel" origin="18,57" size="420,25"
+                font="SmallFont" title="SELECT YOUR INSTRUMENT TONE" text-color="Text"/>
+          <view class="COptionMenu" origin="18,91" size="420,42"
+                control-tag="1000" font="NormalFont"/>
+          <view class="CTextLabel" origin="18,157" size="420,24"
+                font="NormalFont" title="DJ RH  •  PERFORMANCE SOUND ENGINE" text-color="Text"/>
+          <view class="CTextLabel" origin="18,205" size="420,22"
+                font="SmallFont" title="Use the host MIDI input to play" text-color="Text"/>
+          <view class="CTextLabel" origin="18,232" size="420,22"
+                font="SmallFont" title="the selected instrument" text-color="Text"/>
+        </view>
+      </view>
+
+      <!-- Right status panel -->
+      <view class="CViewContainer" origin="688,80" size="170,292" background-color="Background">
+        <view class="CTextLabel" origin="14,18" size="142,28"
+              font="SectionFont" title="MIDI STATUS" text-color="Gold"/>
+        <view class="CTextLabel" origin="14,66" size="142,22"
+              font="NormalFont" title="HOST INPUT" text-color="Text"/>
+        <view class="CTextLabel" origin="14,100" size="142,22"
+              font="SmallFont" title="MIDI notes" text-color="Muted"/>
+        <view class="CTextLabel" origin="14,122" size="142,22"
+              font="SmallFont" title="from FL Studio" text-color="Muted"/>
+        <view class="CTextLabel" origin="14,178" size="142,24"
+              font="SectionFont" title="SOUND BANK" text-color="Accent"/>
+        <view class="CTextLabel" origin="14,218" size="142,22"
+              font="SmallFont" title="134 bundled tones" text-color="Muted"/>
+      </view>
+
+      <!-- Bottom footer -->
+      <view class="CViewContainer" origin="18,390" size="840,82" background-color="Background">
+        <view class="CTextLabel" origin="18,14" size="804,24"
+              font="SectionFont" title="DJ RH  •  AUDIO ZONE" text-color="Accent"/>
+        <view class="CTextLabel" origin="18,44" size="804,20"
+              font="SmallFont" title="Tone selection is linked to the VST3 instrument parameter"
+              text-color="Muted"/>
+      </view>
+
     </view>
   </template>
 </vstgui-ui-description>
