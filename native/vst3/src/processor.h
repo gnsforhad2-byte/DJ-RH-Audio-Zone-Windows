@@ -3,6 +3,7 @@
 #include "public.sdk/source/vst/vstaudioeffect.h"
 #include "pluginterfaces/base/ibstream.h"
 #include "pluginterfaces/vst/ivstevents.h"
+#include "tone_catalog.h"
 
 #include <array>
 #include <atomic>
@@ -76,6 +77,7 @@ private:
     double sampleRate {44100.0};
 
     std::filesystem::path toneDirectory;
+    std::vector<DJRH::ToneEntry> toneCatalog;
 
     std::atomic<int> selectedToneIndex {0};
     std::atomic<float> volume {0.85f};

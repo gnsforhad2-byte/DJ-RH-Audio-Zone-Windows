@@ -36,6 +36,7 @@ private:
     void setPlainParameter(ParamID id, ParamValue plainValue,
                            bool notifyHost);
     void setToneIndex(int index, bool notifyHost);
+    int32 toneCount {134};
 };
 
 } // namespace Vst

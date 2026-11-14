@@ -15,6 +15,7 @@ set(plugin_sources
     src/processor.h
     src/controller.cpp
     src/controller.h
+    src/tone_catalog.h
     src/factory.cpp
 )
 

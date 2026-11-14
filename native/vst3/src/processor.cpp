@@ -49,9 +49,6 @@ std::filesystem::path moduleDirectory() {
 #endif
 }
 
-int toneIndex(ParamValue value) {
-    return int(std::lround(std::clamp(value, 0.0, 1.0) * 133.0));
-}
 }
 
 static const FUID kControllerUID(
@@ -89,6 +86,7 @@ tresult PLUGIN_API DJRHProcessor::initialize(FUnknown* context) {
     addEventInput(STR16("MIDI Input"), 16);
 
     toneDirectory = findToneDirectory();
+    toneCatalog = DJRH::buildToneCatalog(toneDirectory);
     stopLoader.store(false, std::memory_order_release);
     loaderThread = std::thread(&DJRHProcessor::sampleLoaderLoop, this);
     requestTone(0);
@@ -128,7 +126,7 @@ std::filesystem::path DJRHProcessor::findToneDirectory() const {
 }
 
 void DJRHProcessor::requestTone(int index) {
-    if (index < 0 || index >= 134) return;
+    if (index < 0 || static_cast<size_t>(index) >= toneCatalog.size()) return;
     selectedToneIndex.store(index, std::memory_order_release);
     requestedTone.store(index, std::memory_order_release);
     loaderWake.notify_one();
@@ -136,14 +134,15 @@ void DJRHProcessor::requestTone(int index) {
 
 std::shared_ptr<DJRHProcessor::SampleData>
 DJRHProcessor::loadTone(int index) const {
-    if (index < 0 || index >= 134 || toneDirectory.empty()) return {};
+    if (index < 0 || static_cast<size_t>(index) >= toneCatalog.size()) return {};
 
-    auto path = toneDirectory / DJRH::ToneFiles[size_t(index)];
+    const auto& entry = toneCatalog[static_cast<size_t>(index)];
+    const auto& path = entry.filePath;
     auto sample = std::make_shared<SampleData>();
-    sample->rootMidiNote = DJRH::ToneRootMidi[size_t(index)];
-    auto ext = path.extension().string();
+    sample->rootMidiNote = entry.rootMidiNote;
+    auto ext = DJRH::lowerCase(path.extension().string());
 
-    if (ext == ".wav" || ext == ".WAV") {
+    if (ext == ".wav") {
         unsigned int channels = 0, rate = 0;
         drwav_uint64 frames = 0;
         float* decoded = nullptr;
@@ -164,7 +163,7 @@ DJRHProcessor::loadTone(int index) const {
         auto count = size_t(frames) * channels;
         sample->samples.assign(decoded, decoded + count);
         drwav_free(decoded, nullptr);
-    } else if (ext == ".mp3" || ext == ".MP3") {
+    } else if (ext == ".mp3") {
         mp3dec_t decoder{};
         mp3dec_file_info_t info{};
 #ifdef _WIN32
@@ -372,9 +371,13 @@ tresult PLUGIN_API DJRHProcessor::process(ProcessData& data) {
             value = std::clamp(value, 0.0, 1.0);
 
             switch (id) {
-                case kToneParamID:
-                    requestTone(toneIndex(value));
+                case kToneParamID: {
+                    const int count = static_cast<int>(toneCatalog.size());
+                    const int index = count > 1
+                        ? int(std::lround(value * (count - 1))) : 0;
+                    requestTone(index);
                     break;
+                }
 
                 case kVolumeParamID:
                     volume.store(
@@ -459,7 +462,9 @@ tresult PLUGIN_API DJRHProcessor::setState(IBStream* state) {
     streamer.readInt32(savedRelease);
     streamer.readInt32(savedSemitone);
 
-    requestTone(std::clamp<int32>(savedTone, 0, 133));
+    const int32 toneMax = toneCatalog.empty()
+        ? 0 : static_cast<int32>(toneCatalog.size() - 1);
+    requestTone(std::clamp<int32>(savedTone, 0, toneMax));
 
     volume.store(
         float(std::clamp<int32>(savedVolume, 0, 100)) / 100.0f,

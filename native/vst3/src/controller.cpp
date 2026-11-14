@@ -1,8 +1,9 @@
 #include "controller.h"
-#include "tone_names.h"
+#include "tone_catalog.h"
 
 #include "pluginterfaces/base/fstrdefs.h"
 #include "public.sdk/source/vst/vstparameters.h"
+#include "public.sdk/source/vst/utility/stringconvert.h"
 #include "base/source/fstreamer.h"
 #include "vstgui/lib/controls/cbuttons.h"
 
@@ -20,7 +21,6 @@ constexpr ParamID kVolumeParamID = 1010;
 constexpr ParamID kReleaseParamID = 1011;
 constexpr ParamID kSemitoneParamID = 1012;
 
-constexpr int32 kToneCount = 134;
 
 constexpr int32 kButtonToneDown = 2001;
 constexpr int32 kButtonToneUp = 2002;
@@ -40,21 +40,19 @@ tresult PLUGIN_API DJRHController::initialize(FUnknown* context) {
     auto* tone = new StringListParameter(
         STR16("Tone"), kToneParamID);
 
+    const auto toneCatalog = DJRH::buildToneCatalog({});
+    toneCount = static_cast<int32>(toneCatalog.size());
+
     int32 toneNumber = 0;
-    for (const char* name : DJRH::ToneNames) {
-        char displayName[128] {};
+    for (const auto& entry : toneCatalog) {
+        char displayName[256] {};
         std::snprintf(
             displayName, sizeof(displayName),
-            "%03d  %s", int(++toneNumber), name);
+            "%03d  %s", int(++toneNumber),
+            entry.displayName.c_str());
 
         String128 label {};
-        size_t i = 0;
-        while (displayName[i] && i < 127) {
-            label[i] = static_cast<TChar>(
-                static_cast<unsigned char>(displayName[i]));
-            ++i;
-        }
-        label[i] = 0;
+        StringConvert::convert(displayName, label, 128);
         tone->appendString(label);
     }
 
@@ -96,13 +94,17 @@ void DJRHController::setPlainParameter(
 }
 
 void DJRHController::setToneIndex(int index, bool notifyHost) {
-    index = (index % kToneCount + kToneCount) % kToneCount;
-    setParamNormalized(
-        kToneParamID, ParamValue(index) / 133.0);
+    const int32 count = std::max<int32>(1, toneCount);
+    index = (index % count + count) % count;
+
+    const ParamValue normalized =
+        count > 1 ? ParamValue(index) / ParamValue(count - 1) : 0.0;
+
+    setParamNormalized(kToneParamID, normalized);
 
     if (notifyHost) {
         beginEdit(kToneParamID);
-        performEdit(kToneParamID, ParamValue(index) / 133.0);
+        performEdit(kToneParamID, normalized);
         endEdit(kToneParamID);
     }
 }
@@ -126,7 +128,7 @@ tresult PLUGIN_API DJRHController::setComponentState(IBStream* state) {
     streamer.readInt32(savedRelease);
     streamer.readInt32(savedSemitone);
 
-    setToneIndex(std::clamp<int32>(savedTone, 0, 133), false);
+    setToneIndex(std::clamp<int32>(savedTone, 0, std::max<int32>(0, toneCount - 1)), false);
     setPlainParameter(
         kVolumeParamID,
         std::clamp<int32>(savedVolume, 0, 100), false);
@@ -170,8 +172,9 @@ void DJRHController::valueChanged(VSTGUI::CControl* control) {
     const int32 tag = control->getTag();
 
     if (tag == kButtonToneDown || tag == kButtonToneUp) {
+        const int32 count = std::max<int32>(1, toneCount);
         const int current = int(std::lround(
-            getParamNormalized(kToneParamID) * 133.0));
+            getParamNormalized(kToneParamID) * (count - 1)));
         setToneIndex(
             current + (tag == kButtonToneDown ? -1 : 1), true);
         return;
